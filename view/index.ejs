@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <meta charset="UTF-8";>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        let baseUrl="http://localhost:<%= port %>/<%= backendPath %>"
+        console.log(baseUrl)
+
+        function main(){
+          let url = baseUrl + "?callback_url=" + encodeURIComponent(window.location.href);
+          axios
+            .get(url)
+            .then(function (response) {
+                document.write("Return to terminal.")
+            })
+            .catch(function (error) {
+                document.write("Return to terminal.")
+            })
+        }
+
+        window.onload = main
+    </script>
+</html>
