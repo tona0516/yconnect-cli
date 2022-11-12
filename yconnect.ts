@@ -1,5 +1,6 @@
 import { buildUrl } from 'build-url-ts';
 import axios from 'axios';
+import pino from 'pino';
 
 const URL = {
     BASE: "https://auth.login.yahoo.co.jp",
@@ -42,6 +43,12 @@ export interface RefreshTokenParam {
 }
 
 export class YConnect {
+    logger: pino.Logger
+
+    constructor(logger: pino.Logger) {
+        this.logger = logger;
+    }
+
     authorization(param: AuthorizationParam): string {
         let query: { [key: string]: any } = {}
         query['response_type'] = [...param.responseType].join(" ")

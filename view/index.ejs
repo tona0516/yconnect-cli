@@ -4,7 +4,6 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         let baseUrl="http://localhost:<%= port %>/<%= backendPath %>"
-        console.log(baseUrl)
 
         function main(){
           let url = baseUrl + "?callback_url=" + encodeURIComponent(window.location.href);

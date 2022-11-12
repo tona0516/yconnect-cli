@@ -2,10 +2,17 @@ import { OptionValues } from "commander"
 import open from "open"
 import { Server } from "./server"
 import { AuthorizationParam, YConnect } from "./yconnect"
+import * as pino from "pino";
 
 export class Usecase {
+    logger: pino.Logger
+
+    constructor(logger: pino.Logger) {
+        this.logger = logger;
+    }
+
     async auth(options: OptionValues) {
-        const yconnect = new YConnect()
+        const yconnect = new YConnect(this.logger)
 
         const authzParam: AuthorizationParam = {
             responseType: options.responseType,
@@ -36,9 +43,7 @@ export class Usecase {
             authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams)
         }
 
-        console.log("=== Authorization Response ===")
-        console.log(authzResponse)
-        console.log()
+        this.logger.info(authzResponse, "Authorization Response")
 
         if (!authzResponse.code) {
             // implicit もしくは bail=1で同意キャンセル もしくは エラー
@@ -54,13 +59,11 @@ export class Usecase {
             }
         )
 
-        console.log("=== Token Response ===")
-        console.log(tokenResponse)
-        console.log()
+        this.logger.info(tokenResponse, "Token Response")
     }
 
     async refresh(options: OptionValues) {
-        const yconnect = new YConnect()
+        const yconnect = new YConnect(this.logger)
 
         let tokenResponse = await yconnect.refreshToken(
             {
@@ -70,8 +73,6 @@ export class Usecase {
             }
         )
 
-        console.log("=== Token Response ===")
-        console.log(tokenResponse)
-        console.log()
+        this.logger.info(tokenResponse, "Token Response")
     }
 }
