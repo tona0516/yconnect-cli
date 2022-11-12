@@ -4,16 +4,25 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         let baseUrl="http://localhost:<%= port %>/<%= backendPath %>"
+        let closeTimeoutSec = 5
 
-        function main(){
+        function main() {
           let url = baseUrl + "?callback_url=" + encodeURIComponent(window.location.href);
           axios
             .get(url)
             .then(function (response) {
-                document.write("Return to terminal.")
+                document.write("<p>ターミナルに結果を表示しています。</p>")
+                document.write(`<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`)
+                setTimeout(function() {
+                    window.close()
+                }, closeTimeoutSec * 1000)
             })
             .catch(function (error) {
-                document.write("Return to terminal.")
+                document.write("<p>ターミナルに結果を表示しています。</p>")
+                document.write(`<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`)
+                setTimeout(function() {
+                    window.close()
+                }, closeTimeoutSec * 1000)
             })
         }
 
