@@ -58,4 +58,20 @@ export class Usecase {
         console.log(tokenResponse)
         console.log()
     }
+
+    async refresh(options: OptionValues) {
+        const yconnect = new YConnect()
+
+        let tokenResponse = await yconnect.refreshToken(
+            {
+                clientId: options.clientId,
+                refreshToken: options.refreshToken,
+                clientSecret: options.clientSecret
+            }
+        )
+
+        console.log("=== Token Response ===")
+        console.log(tokenResponse)
+        console.log()
+    }
 }

@@ -30,6 +30,17 @@ function main() {
             new Usecase().auth(options)
         })
 
+    program
+        .command("refresh")
+        .description("Refresh access token.")
+        .requiredOption('-c, --client-id <string>', 'Client ID')
+        .requiredOption('-r, --refresh-token <string>', 'Refresh Token')
+        .option('--client-secret <string>', 'Client Secret')
+        .action((options) => {
+            console.log(options)
+            new Usecase().refresh(options)
+        })
+
     program.parse()
 }
 

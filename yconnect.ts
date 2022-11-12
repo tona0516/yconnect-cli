@@ -7,6 +7,11 @@ const URL = {
     TOKEN: "yconnect/v2/token"
 }
 
+const GrantType = {
+    CODE: "authorization_code",
+    REFRESH: "refresh_token"
+}
+
 export interface AuthorizationParam {
     responseType: string[],
     clientId: string,
@@ -28,6 +33,12 @@ export interface IssueTokenParam {
     code: string,
     clientSecret?: string,
     codeVerifier?: string
+}
+
+export interface RefreshTokenParam {
+    clientId: string,
+    refreshToken: string,
+    clientSecret?: string,
 }
 
 export class YConnect {
@@ -54,12 +65,29 @@ export class YConnect {
 
     async issueToken(param: IssueTokenParam): Promise<{ [key: string]: string }> {
         let searchParams = new URLSearchParams()
-        searchParams.append("grant_type", "authorization_code")
+        searchParams.append("grant_type", GrantType.CODE)
         searchParams.append("client_id", param.clientId)
         searchParams.append("redirect_uri", param.redirectUri)
         searchParams.append("code", param.code)
         if (param.clientSecret) searchParams.append("client_secret", param.clientSecret)
         if (param.codeVerifier) searchParams.append("code_verifier", param.codeVerifier)
+
+        return await axios.post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
+        .then(function (response) {
+            return response.data
+        })
+        .catch(function (error) {
+            return error.response.data
+        });
+    }
+
+    async refreshToken(param: RefreshTokenParam): Promise<{ [key: string]: string }> {
+        let searchParams = new URLSearchParams()
+        searchParams.append("grant_type", GrantType.REFRESH)
+        searchParams.append("client_id", param.clientId)
+        searchParams.append("refresh_token", param.refreshToken)
+
+        if (param.clientSecret) searchParams.append("client_secret", param.clientSecret)
 
         return await axios.post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
         .then(function (response) {
