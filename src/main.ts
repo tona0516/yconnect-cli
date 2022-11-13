@@ -76,6 +76,16 @@ function main() {
       new Usecase(logger).refresh(options);
     });
 
+  program
+    .command("userinfo")
+    .description("Get user data from UserInfoAPI.")
+    .requiredOption("-a, --access-token <string>", "Access Token")
+    .action((options) => {
+      logger.level = options.debug ? "debug" : "info";
+      logger.info(options, "Input parameters");
+      new Usecase(logger).userinfo(options);
+    });
+
   program.parse();
 }
 

@@ -1,6 +1,7 @@
 import { OptionValues } from "commander";
 import open from "open";
 import * as pino from "pino";
+import { Userinfo } from "./userinfo";
 import { Server } from "./server";
 import { AuthorizationParam, YConnect } from "./yconnect";
 
@@ -72,5 +73,13 @@ export class Usecase {
     });
 
     this.logger.info(tokenResponse, "Token Response");
+  }
+
+  async userinfo(options: OptionValues) {
+    const userinfo = new Userinfo(this.logger);
+
+    const tokenResponse = await userinfo.get(options.accessToken as string);
+
+    this.logger.info(tokenResponse, "Userinfo Response");
   }
 }
