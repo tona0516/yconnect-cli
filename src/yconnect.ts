@@ -50,17 +50,17 @@ export class YConnect {
   }
 
   authorization(param: AuthorizationParam): string {
-    const query: { [key: string]: any } = {};
+    const query: { [key: string]: string } = {};
     query["response_type"] = [...param.responseType].join(" ");
     query["client_id"] = param.clientId;
     query["redirect_uri"] = param.redirectUri;
     query["scope"] = [...param.scope].join(" ");
-    if (param.bail) query["bail"] = 1;
+    if (param.bail) query["bail"] = "1";
     if (param.state) query["state"] = param.state;
     if (param.nonce) query["nonce"] = param.nonce;
     if (param.display) query["display"] = param.display;
     if (param.prompt) query["prompt"] = [...param.prompt].join(" ");
-    if (param.maxAge) query["max_age"] = param.maxAge;
+    if (param.maxAge) query["max_age"] = param.maxAge.toString();
     if (param.codeChallenge) query["code_challenge"] = param.codeChallenge;
     if (param.codeChallengeMethod)
       query["code_challenge_method"] = param.codeChallengeMethod;

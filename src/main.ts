@@ -1,11 +1,10 @@
 import { Command, Option } from "commander";
 import pino from "pino";
+import { assertIsDefined } from "./util";
 import { Usecase } from "./usecase";
 
 function main() {
-  const program = new Command();
   const logger = pino({
-    name: process.env.npm_package_name!,
     transport: {
       target: "pino-pretty",
       options: {
@@ -14,15 +13,28 @@ function main() {
     },
   });
 
+  try {
+    assertIsDefined("npm_package_name", process.env.npm_package_name);
+    assertIsDefined(
+      "npm_package_description",
+      process.env.npm_package_description
+    );
+    assertIsDefined("npm_package_version", process.env.npm_package_version);
+  } catch (e) {
+    if (e instanceof Error) logger.fatal(e.message);
+    process.exit(1);
+  }
+
+  const program = new Command();
+
   program
-    .name(process.env.npm_package_name!)
-    .description(process.env.npm_package_description!)
-    .version(process.env.npm_package_version!, "-v, --version");
+    .name(process.env.npm_package_name)
+    .description(process.env.npm_package_description)
+    .version(process.env.npm_package_version, "-v, --version");
 
   program
     .command("auth")
     .description("Authorize and getting tokens.")
-    .addOption(new Option("-d, --debug", "debug mode").default(false))
     .requiredOption("-c, --client-id <string>", "Client ID")
     .option("--client-secret <string>", "Client Secret")
     .addOption(
@@ -41,12 +53,10 @@ function main() {
     .option("--nonce <string>", "nonce")
     .option("--display <string>", "display")
     .option("--prompt <string...>", "prompt")
-    .option("--max-age <number>", "max-age")
-    .option("--code-challenge <string>", "code-challenge")
-    .option(
-      "--code-challenge-method <string>",
-      "code-challenge-method <number>"
-    )
+    .option("--max-age <number>", "max_age")
+    .option("--code-challenge <string>", "code_challenge")
+    .option("--code-challenge-method <string>", "code_challenge_method")
+    .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
       logger.level = options.debug ? "debug" : "info";
       logger.info(options, "Input parameters");
@@ -56,10 +66,10 @@ function main() {
   program
     .command("refresh")
     .description("Refresh access token.")
-    .addOption(new Option("-d, --debug", "debug mode").default(false))
     .requiredOption("-c, --client-id <string>", "Client ID")
     .requiredOption("-r, --refresh-token <string>", "Refresh Token")
     .option("--client-secret <string>", "Client Secret")
+    .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
       logger.level = options.debug ? "debug" : "info";
       logger.info(options, "Input parameters");
