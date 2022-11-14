@@ -1,6 +1,5 @@
 import { Command, Option } from "commander";
 import pino from "pino";
-import { assertIsDefined } from "./util";
 import { Usecase } from "./usecase";
 
 function main() {
@@ -13,24 +12,12 @@ function main() {
     },
   });
 
-  try {
-    assertIsDefined("npm_package_name", process.env.npm_package_name);
-    assertIsDefined(
-      "npm_package_description",
-      process.env.npm_package_description
-    );
-    assertIsDefined("npm_package_version", process.env.npm_package_version);
-  } catch (e) {
-    if (e instanceof Error) logger.fatal(e.message);
-    process.exit(1);
-  }
-
   const program = new Command();
 
   program
-    .name(process.env.npm_package_name)
-    .description(process.env.npm_package_description)
-    .version(process.env.npm_package_version, "-v, --version");
+    .name("yconnect-cli")
+    .description("CLI for Yahoo! Identity Federation")
+    .version("1.0.0", "-v, --version");
 
   program
     .command("auth")
