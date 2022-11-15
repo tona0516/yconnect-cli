@@ -58,7 +58,7 @@ export class Usecase {
 
     if (!authzResponse.code) {
       // implicit もしくは bail=1で同意キャンセル もしくは エラー
-      this.logger.info(
+      this.logger.debug(
         "Message",
         "no 'code' parameter in authorization response"
       );
