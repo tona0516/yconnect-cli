@@ -69,7 +69,7 @@ export class Usecase {
     const tokenResponse = await yconnect.refreshToken({
       clientId: options.clientId as string,
       refreshToken: options.refreshToken as string,
-      clientSecret: options.clientSecre as string,
+      clientSecret: options.clientSecret as string,
     });
 
     this.logger.info(tokenResponse, "Token Response");
