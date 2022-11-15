@@ -10,13 +10,10 @@
     "build": "run-s build:clean build:tsc",
     "build:clean": "rm -rf dist",
     "build:tsc": "tsc --build",
-    "lint": "run-s lint:tsc lint:eslint lint:prettier",
-    "lint:tsc": "tsc --noEmit",
-    "lint:eslint": "eslint --cache ./src",
-    "lint:prettier": "prettier --check ./src",
-    "lint-fix": "run-s lint-fix:eslint lint-fix:prettier",
+    "lint-fix": "run-s lint-fix:eslint lint-fix:prettier lint-fix:prettier-html",
     "lint-fix:eslint": "eslint --cache --fix ./src",
-    "lint-fix:prettier": "prettier --write ./src"
+    "lint-fix:prettier": "prettier --write ./src",
+    "lint-fix:prettier-html": "prettier --parser html --write ./view/*.ejs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.42.1",
@@ -36,7 +33,7 @@
     "@types/open": "^6.2.1",
     "@types/pino": "^7.0.5",
     "@types/qs": "^6.9.7",
-    "axios": "^1.1.3",
+    "axios": "^0.27.2",
     "build-url-ts": "^6.1.3",
     "commander": "^9.4.0",
     "ejs": "^3.1.8",

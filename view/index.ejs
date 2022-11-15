@@ -1,31 +1,36 @@
 <!DOCTYPE html>
 <html>
-    <meta charset="UTF-8";>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
-        let baseUrl="http://localhost:<%= port %>/<%= backendPath %>"
-        let closeTimeoutSec = 5
+  <meta charset="UTF-8" ; />
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    let baseUrl = "http://localhost:<%= port %>/<%= backendPath %>";
+    let closeTimeoutSec = "<%= windowCloseTimeoutSec %>";
 
-        function main() {
-          let url = baseUrl + "?callback_url=" + encodeURIComponent(window.location.href);
-          axios
-            .get(url)
-            .then(function (response) {
-                document.write("<p>ターミナルに結果を表示しています。</p>")
-                document.write(`<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`)
-                setTimeout(function() {
-                    window.close()
-                }, closeTimeoutSec * 1000)
-            })
-            .catch(function (error) {
-                document.write("<p>ターミナルに結果を表示しています。</p>")
-                document.write(`<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`)
-                setTimeout(function() {
-                    window.close()
-                }, closeTimeoutSec * 1000)
-            })
-        }
+    function main() {
+      let url =
+        baseUrl + "?callback_url=" + encodeURIComponent(window.location.href);
+      axios
+        .get(url)
+        .then(function (response) {
+          document.write("<p>ターミナルに結果を表示しています。</p>");
+          document.write(
+            `<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`
+          );
+          setTimeout(function () {
+            window.close();
+          }, closeTimeoutSec * 1000);
+        })
+        .catch(function (error) {
+          document.write("<p>ターミナルに結果を表示しています。</p>");
+          document.write(
+            `<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`
+          );
+          setTimeout(function () {
+            window.close();
+          }, closeTimeoutSec * 1000);
+        });
+    }
 
-        window.onload = main
-    </script>
+    window.onload = main;
+  </script>
 </html>

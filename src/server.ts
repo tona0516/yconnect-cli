@@ -5,7 +5,8 @@ export class Server {
   async create(
     frontendPath = "front",
     backendPath = "back",
-    port = 3000
+    port = 3000,
+    windowCloseTimeoutSec = 5
   ): Promise<string> {
     return new Promise((resolve) => {
       const express = Express();
@@ -18,6 +19,7 @@ export class Server {
           res.render("./index.ejs", {
             port: port,
             backendPath: backendPath,
+            windowCloseTimeoutSec: windowCloseTimeoutSec,
           });
         }
       );
