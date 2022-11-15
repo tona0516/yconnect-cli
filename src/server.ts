@@ -28,7 +28,8 @@ export class Server {
         `/${backendPath}`,
         (req: Express.Request, res: Express.Response) => {
           res.sendStatus(200);
-          server.close();
+          server.closeAllConnections()
+          server.close()
           const callbackUrl = decodeURIComponent(
             url.parse(req.url, true).query.callback_url as string
           );
