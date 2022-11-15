@@ -1,17 +1,8 @@
 import { Command, Option } from "commander";
-import pino from "pino";
+import { Logger, Stdout } from "./logger";
 import { Usecase } from "./usecase";
 
 function main() {
-  const logger = pino({
-    transport: {
-      target: "pino-pretty",
-      options: {
-        ignore: "pid,hostname",
-      },
-    },
-  });
-
   const program = new Command();
 
   program
@@ -45,8 +36,8 @@ function main() {
     .option("--code-challenge-method <string>", "code_challenge_method")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
-      logger.level = options.debug ? "debug" : "info";
-      logger.info(options, "Input parameters");
+      const logger: Logger = new Stdout(options.debug);
+      logger.info("Input parameters", options);
       new Usecase(logger).auth(options);
     });
 
@@ -58,8 +49,7 @@ function main() {
     .option("--client-secret <string>", "Client Secret")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
-      logger.level = options.debug ? "debug" : "info";
-      logger.info(options, "Input parameters");
+      const logger: Logger = new Stdout(options.debug);
       new Usecase(logger).refresh(options);
     });
 
@@ -68,8 +58,7 @@ function main() {
     .description("Get user data from UserInfoAPI.")
     .requiredOption("-a, --access-token <string>", "Access Token")
     .action((options) => {
-      logger.level = options.debug ? "debug" : "info";
-      logger.info(options, "Input parameters");
+      const logger: Logger = new Stdout(options.debug);
       new Usecase(logger).userinfo(options);
     });
 

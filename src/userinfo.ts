@@ -1,5 +1,5 @@
 import axios from "axios";
-import pino from "pino";
+import { Logger } from "./logger";
 
 const URL = {
   BASE: "https://userinfo.yahooapis.jp",
@@ -7,9 +7,9 @@ const URL = {
 };
 
 export class Userinfo {
-  logger: pino.Logger;
+  logger: Logger;
 
-  constructor(logger: pino.Logger) {
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 

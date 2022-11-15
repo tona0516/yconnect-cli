@@ -1,6 +1,6 @@
 import axios from "axios";
 import { buildUrl } from "build-url-ts";
-import pino from "pino";
+import { Logger } from "./logger";
 
 const URL = {
   BASE: "https://auth.login.yahoo.co.jp",
@@ -43,9 +43,9 @@ export interface RefreshTokenParam {
 }
 
 export class YConnect {
-  logger: pino.Logger;
+  logger: Logger;
 
-  constructor(logger: pino.Logger) {
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 

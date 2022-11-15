@@ -1,14 +1,14 @@
 import { OptionValues } from "commander";
 import open from "open";
-import * as pino from "pino";
 import { Userinfo } from "./userinfo";
 import { Server } from "./server";
 import { AuthorizationParam, YConnect } from "./yconnect";
+import { Logger } from "./logger";
 
 export class Usecase {
-  logger: pino.Logger;
+  logger: Logger;
 
-  constructor(logger: pino.Logger) {
+  constructor(logger: Logger) {
     this.logger = logger;
   }
 
@@ -30,13 +30,21 @@ export class Usecase {
       codeChallengeMethod: options.code_challenge_method as string,
     };
 
+    this.logger.debug("Authorization Parameter", authzParam);
+
     const authzUrl = yconnect.authorization(authzParam);
+
+    this.logger.debug("Authorization URL", authzUrl);
+
     open(authzUrl);
 
     const server = new Server();
     const callbackUrl = await server.create();
 
+    this.logger.debug("Callback URL", callbackUrl);
+
     let authzResponse: { [key: string]: string } = {};
+
     if (callbackUrl.includes("#")) {
       authzResponse = Object.fromEntries(
         new URLSearchParams(new URL(callbackUrl).hash.substring(1))
@@ -46,10 +54,14 @@ export class Usecase {
       authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams);
     }
 
-    this.logger.info(authzResponse, "Authorization Response");
+    this.logger.info("Authorization Response", authzResponse);
 
     if (!authzResponse.code) {
       // implicit もしくは bail=1で同意キャンセル もしくは エラー
+      this.logger.info(
+        "Message",
+        "no 'code' parameter in authorization response"
+      );
       return;
     }
 
@@ -60,7 +72,7 @@ export class Usecase {
       clientSecret: options.clientSecret as string,
     });
 
-    this.logger.info(tokenResponse, "Token Response");
+    this.logger.info("Token Response", tokenResponse);
   }
 
   async refresh(options: OptionValues) {
@@ -72,14 +84,14 @@ export class Usecase {
       clientSecret: options.clientSecret as string,
     });
 
-    this.logger.info(tokenResponse, "Token Response");
+    this.logger.info("Token Response", tokenResponse);
   }
 
   async userinfo(options: OptionValues) {
     const userinfo = new Userinfo(this.logger);
 
-    const tokenResponse = await userinfo.get(options.accessToken as string);
+    const userinfoResponse = await userinfo.get(options.accessToken as string);
 
-    this.logger.info(tokenResponse, "Userinfo Response");
+    this.logger.info("Userinfo Response", userinfoResponse);
   }
 }
