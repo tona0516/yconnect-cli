@@ -29,22 +29,18 @@ export class Usecase {
       codeChallenge: options.code_challenge as string,
       codeChallengeMethod: options.code_challenge_method as string,
     };
-
     this.logger.debug("Authorization Parameter", authzParam);
 
     const authzUrl = yconnect.authorization(authzParam);
-
     this.logger.debug("Authorization URL", authzUrl);
 
     open(authzUrl);
 
     const server = new Server();
     const callbackUrl = await server.create();
-
     this.logger.debug("Callback URL", callbackUrl);
 
     let authzResponse: { [key: string]: string } = {};
-
     if (callbackUrl.includes("#")) {
       authzResponse = Object.fromEntries(
         new URLSearchParams(new URL(callbackUrl).hash.substring(1))
@@ -53,14 +49,13 @@ export class Usecase {
     if (callbackUrl.includes("?")) {
       authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams);
     }
-
     this.logger.info("Authorization Response", authzResponse);
 
     if (!authzResponse.code) {
       // implicit もしくは bail=1で同意キャンセル もしくは エラー
-      this.logger.debug(
+      this.logger.info(
         "Message",
-        "no 'code' parameter in authorization response"
+        "No 'code' parameter in authorization response."
       );
       return;
     }

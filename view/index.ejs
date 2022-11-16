@@ -5,6 +5,17 @@
   <script>
     let baseUrl = "http://localhost:<%= port %>/<%= backendPath %>";
     let closeTimeoutSec = "<%= windowCloseTimeoutSec %>";
+    let contents = `
+        <p>ターミナルに結果を表示しています。</p>
+        <p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>
+    `;
+
+    function onResponse(response) {
+      document.write(contents);
+      setTimeout(function () {
+        window.close();
+      }, closeTimeoutSec * 1000);
+    }
 
     function main() {
       let url =
@@ -12,22 +23,10 @@
       axios
         .get(url)
         .then(function (response) {
-          document.write("<p>ターミナルに結果を表示しています。</p>");
-          document.write(
-            `<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`
-          );
-          setTimeout(function () {
-            window.close();
-          }, closeTimeoutSec * 1000);
+          onResponse(response);
         })
         .catch(function (error) {
-          document.write("<p>ターミナルに結果を表示しています。</p>");
-          document.write(
-            `<p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>`
-          );
-          setTimeout(function () {
-            window.close();
-          }, closeTimeoutSec * 1000);
+          onResponse(response);
         });
     }
 

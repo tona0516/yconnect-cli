@@ -37,7 +37,7 @@ function main() {
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
       const logger: Logger = new Stdout(options.debug);
-      logger.info("Input parameters", options);
+      logger.debug("Input parameters", options);
       new Usecase(logger).auth(options);
     });
 
@@ -50,6 +50,7 @@ function main() {
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
       const logger: Logger = new Stdout(options.debug);
+      logger.debug("Input parameters", options);
       new Usecase(logger).refresh(options);
     });
 
@@ -59,6 +60,7 @@ function main() {
     .requiredOption("-a, --access-token <string>", "Access Token")
     .action((options) => {
       const logger: Logger = new Stdout(options.debug);
+      logger.debug("Input parameters", options);
       new Usecase(logger).userinfo(options);
     });
 

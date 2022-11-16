@@ -55,15 +55,30 @@ export class YConnect {
     query["client_id"] = param.clientId;
     query["redirect_uri"] = param.redirectUri;
     query["scope"] = [...param.scope].join(" ");
-    if (param.bail) query["bail"] = "1";
-    if (param.state) query["state"] = param.state;
-    if (param.nonce) query["nonce"] = param.nonce;
-    if (param.display) query["display"] = param.display;
-    if (param.prompt) query["prompt"] = [...param.prompt].join(" ");
-    if (param.maxAge) query["max_age"] = param.maxAge.toString();
-    if (param.codeChallenge) query["code_challenge"] = param.codeChallenge;
-    if (param.codeChallengeMethod)
+    if (param.bail) {
+      query["bail"] = "1";
+    }
+    if (param.state) {
+      query["state"] = param.state;
+    }
+    if (param.nonce) {
+      query["nonce"] = param.nonce;
+    }
+    if (param.display) {
+      query["display"] = param.display;
+    }
+    if (param.prompt) {
+      query["prompt"] = [...param.prompt].join(" ");
+    }
+    if (param.maxAge) {
+      query["max_age"] = param.maxAge.toString();
+    }
+    if (param.codeChallenge) {
+      query["code_challenge"] = param.codeChallenge;
+    }
+    if (param.codeChallengeMethod) {
       query["code_challenge_method"] = param.codeChallengeMethod;
+    }
 
     return buildUrl(URL.BASE, {
       path: URL.AUTHORIZATION,
@@ -77,10 +92,12 @@ export class YConnect {
     searchParams.append("client_id", param.clientId);
     searchParams.append("redirect_uri", param.redirectUri);
     searchParams.append("code", param.code);
-    if (param.clientSecret)
+    if (param.clientSecret) {
       searchParams.append("client_secret", param.clientSecret);
-    if (param.codeVerifier)
+    }
+    if (param.codeVerifier) {
       searchParams.append("code_verifier", param.codeVerifier);
+    }
 
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
@@ -99,9 +116,9 @@ export class YConnect {
     searchParams.append("grant_type", GrantType.REFRESH);
     searchParams.append("client_id", param.clientId);
     searchParams.append("refresh_token", param.refreshToken);
-
-    if (param.clientSecret)
+    if (param.clientSecret) {
       searchParams.append("client_secret", param.clientSecret);
+    }
 
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
