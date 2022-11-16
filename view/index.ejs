@@ -6,8 +6,8 @@
     let baseUrl = "http://localhost:<%= port %>/<%= backendPath %>";
     let closeTimeoutSec = "<%= windowCloseTimeoutSec %>";
     let contents = `
-        <p>ターミナルに結果を表示しています。</p>
-        <p>このタブは${closeTimeoutSec}秒後に自動的に閉じます。</p>
+        <p>Terminal shows a result. </p>
+        <p>Automatically close this tab after ${closeTimeoutSec} seconds.</p>
     `;
 
     function onResponse(response) {

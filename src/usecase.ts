@@ -52,7 +52,9 @@ export class Usecase {
     this.logger.info("Authorization Response", authzResponse);
 
     if (!authzResponse.code) {
-      // implicit もしくは bail=1で同意キャンセル もしくは エラー
+      // - implicit flow
+      // - bail=1 and no consent
+      // - respond error
       this.logger.info(
         "Message",
         "No 'code' parameter in authorization response."
