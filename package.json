@@ -5,6 +5,9 @@
   "repository": "git@github.com:tona0516/yconnect-cli.git",
   "author": "tona0516 <tonango.0516@gmail.com>",
   "license": "MIT",
+  "bin": {
+    "yconnect-cli": "bin/yconnect-cli.js"
+  },
   "scripts": {
     "run": "npm run build && node dist/main.js",
     "build": "run-s build:clean build:tsc",
