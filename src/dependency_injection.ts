@@ -5,7 +5,7 @@ import {
 import { CallbackServer } from "./callback_server";
 import { Logger } from "./logger";
 import { Usecase } from "./usecase";
-import { Userinfo } from "./userinfo";
+import { UserinfoApi } from "./userinfoapi";
 import { YConnect } from "./yconnect";
 
 export class DependencyInjection {
@@ -27,7 +27,7 @@ export class DependencyInjection {
   private init(): TsyringeDependencyContainer {
     container.register("Logger", { useClass: Logger });
     container.register("CallbackServer", { useClass: CallbackServer });
-    container.register("Userinfo", { useClass: Userinfo });
+    container.register("UserinfoApi", { useClass: UserinfoApi });
     container.register("YConnect", { useClass: YConnect });
     container.register("Usecase", { useClass: Usecase });
 

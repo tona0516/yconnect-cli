@@ -8,7 +8,7 @@ const URL = {
 };
 
 @injectable()
-export class Userinfo {
+export class UserinfoApi {
   constructor(@inject("Logger") private logger: Logger) {}
 
   async get(accessToken: string): Promise<{ [key: string]: string }> {

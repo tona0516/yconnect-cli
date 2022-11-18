@@ -1,6 +1,6 @@
 import { OptionValues } from "commander";
 import open from "open";
-import { Userinfo } from "./userinfo";
+import { UserinfoApi } from "./userinfoapi";
 import { CallbackServer } from "./callback_server";
 import { AuthorizationParam, YConnect } from "./yconnect";
 import { Logger } from "./logger";
@@ -10,13 +10,12 @@ import { inject, injectable } from "tsyringe";
 export class Usecase {
   constructor(
     @inject("Logger") private logger: Logger,
+    @inject("CallbackServer") private callbackServer: CallbackServer,
     @inject("YConnect") private yconnect: YConnect,
-    @inject("Userinfo") private userinfo: Userinfo
+    @inject("UserinfoApi") private userinfoApi: UserinfoApi
   ) {}
 
   async authorize(options: OptionValues) {
-    const yconnect = new YConnect(this.logger);
-
     const authzParam: AuthorizationParam = {
       responseType: options.responseType as string[],
       clientId: options.clientId as string,
@@ -33,13 +32,12 @@ export class Usecase {
     };
     this.logger.debug("Authorization Parameter", authzParam);
 
-    const authzUrl = yconnect.authorization(authzParam);
+    const authzUrl = this.yconnect.authorization(authzParam);
     this.logger.debug("Authorization URL", authzUrl);
 
     open(authzUrl);
 
-    const server = new CallbackServer();
-    const callbackUrl = await server.create();
+    const callbackUrl = await this.callbackServer.create();
     this.logger.debug("Callback URL", callbackUrl);
 
     let authzResponse: { [key: string]: string } = {};
@@ -64,7 +62,7 @@ export class Usecase {
       return;
     }
 
-    const tokenResponse = await yconnect.issueToken({
+    const tokenResponse = await this.yconnect.issueToken({
       clientId: options.clientId as string,
       redirectUri: options.redirectUri as string,
       code: authzResponse.code,
@@ -75,9 +73,7 @@ export class Usecase {
   }
 
   async refresh(options: OptionValues) {
-    const yconnect = new YConnect(this.logger);
-
-    const tokenResponse = await yconnect.refreshToken({
+    const tokenResponse = await this.yconnect.refreshToken({
       clientId: options.clientId as string,
       refreshToken: options.refreshToken as string,
       clientSecret: options.clientSecret as string,
@@ -87,9 +83,9 @@ export class Usecase {
   }
 
   async fetchUserinfo(options: OptionValues) {
-    const userinfo = new Userinfo(this.logger);
-
-    const userinfoResponse = await userinfo.get(options.accessToken as string);
+    const userinfoResponse = await this.userinfoApi.get(
+      options.accessToken as string
+    );
 
     this.logger.info("Userinfo Response", userinfoResponse);
   }

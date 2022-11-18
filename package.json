@@ -9,7 +9,7 @@
     "yconnect-cli": "bin/yconnect-cli.js"
   },
   "scripts": {
-    "run": "npm run build && node dist/main.js",
+    "run": "ts-node src/main.ts",
     "build": "run-s build:clean build:tsc",
     "build:clean": "rm -rf dist",
     "build:tsc": "tsc --build",
@@ -26,6 +26,7 @@
     "node": "^19.0.1",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
   },
   "dependencies": {
