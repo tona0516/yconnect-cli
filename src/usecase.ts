@@ -32,7 +32,7 @@ export class Usecase {
     };
     this.logger.debug("Authorization Parameter", authzParam);
 
-    const authzUrl = this.yconnect.authorization(authzParam);
+    const authzUrl = this.yconnect.generateAuthzURL(authzParam);
     this.logger.debug("Authorization URL", authzUrl);
 
     open(authzUrl);

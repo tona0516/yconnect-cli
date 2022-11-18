@@ -47,7 +47,7 @@ export interface RefreshTokenParam {
 export class YConnect {
   constructor(@inject("Logger") private logger: Logger) {}
 
-  authorization(param: AuthorizationParam): string {
+  generateAuthzURL(param: AuthorizationParam): string {
     const query: { [key: string]: string } = {};
     query["response_type"] = [...param.responseType].join(" ");
     query["client_id"] = param.clientId;
