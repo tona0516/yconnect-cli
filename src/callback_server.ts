@@ -1,7 +1,9 @@
 import url from "url";
 import Express from "express";
+import { injectable } from "tsyringe";
 
-export class Server {
+@injectable()
+export class CallbackServer {
   async create(
     frontendPath = "front",
     backendPath = "back",

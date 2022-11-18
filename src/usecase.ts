@@ -1,18 +1,20 @@
 import { OptionValues } from "commander";
 import open from "open";
 import { Userinfo } from "./userinfo";
-import { Server } from "./server";
+import { CallbackServer } from "./callback_server";
 import { AuthorizationParam, YConnect } from "./yconnect";
 import { Logger } from "./logger";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class Usecase {
-  logger: Logger;
+  constructor(
+    @inject("Logger") private logger: Logger,
+    @inject("YConnect") private yconnect: YConnect,
+    @inject("Userinfo") private userinfo: Userinfo
+  ) {}
 
-  constructor(logger: Logger) {
-    this.logger = logger;
-  }
-
-  async auth(options: OptionValues) {
+  async authorize(options: OptionValues) {
     const yconnect = new YConnect(this.logger);
 
     const authzParam: AuthorizationParam = {
@@ -36,7 +38,7 @@ export class Usecase {
 
     open(authzUrl);
 
-    const server = new Server();
+    const server = new CallbackServer();
     const callbackUrl = await server.create();
     this.logger.debug("Callback URL", callbackUrl);
 
@@ -84,7 +86,7 @@ export class Usecase {
     this.logger.info("Token Response", tokenResponse);
   }
 
-  async userinfo(options: OptionValues) {
+  async fetchUserinfo(options: OptionValues) {
     const userinfo = new Userinfo(this.logger);
 
     const userinfoResponse = await userinfo.get(options.accessToken as string);

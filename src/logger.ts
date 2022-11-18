@@ -1,14 +1,12 @@
 /* eslint-disable  @typescript-eslint/no-explicit-any */
+import { injectable } from "tsyringe";
 
-export interface Logger {
-  debug(title: string, message: any): void;
-  info(title: string, message: any): void;
-}
+@injectable()
+export class Logger implements Logger {
+  private isDebug = false;
 
-export class Stdout implements Logger {
-  isDebug: boolean;
-  constructor(isDebug: boolean) {
-    this.isDebug = isDebug;
+  enableDebug(): void {
+    this.isDebug = true;
   }
 
   debug(title: string, message: any) {

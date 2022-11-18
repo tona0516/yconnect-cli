@@ -1,5 +1,6 @@
 import axios from "axios";
 import { buildUrl } from "build-url-ts";
+import { inject, injectable } from "tsyringe";
 import { Logger } from "./logger";
 
 const URL = {
@@ -42,12 +43,9 @@ export interface RefreshTokenParam {
   clientSecret?: string;
 }
 
+@injectable()
 export class YConnect {
-  logger: Logger;
-
-  constructor(logger: Logger) {
-    this.logger = logger;
-  }
+  constructor(@inject("Logger") private logger: Logger) {}
 
   authorization(param: AuthorizationParam): string {
     const query: { [key: string]: string } = {};

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { inject, injectable } from "tsyringe";
 import { Logger } from "./logger";
 
 const URL = {
@@ -6,12 +7,9 @@ const URL = {
   ATTRIBUTE: "yconnect/v2/attribute",
 };
 
+@injectable()
 export class Userinfo {
-  logger: Logger;
-
-  constructor(logger: Logger) {
-    this.logger = logger;
-  }
+  constructor(@inject("Logger") private logger: Logger) {}
 
   async get(accessToken: string): Promise<{ [key: string]: string }> {
     const searchParams = new URLSearchParams();
