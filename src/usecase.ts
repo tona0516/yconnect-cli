@@ -27,14 +27,13 @@ export class Usecase {
       display: options.display as string,
       prompt: options.prompt as string[],
       maxAge: options.maxAge as number,
-      codeChallenge: options.code_challenge as string,
-      codeChallengeMethod: options.code_challenge_method as string,
+      codeChallenge: options.codeChallenge as string,
+      codeChallengeMethod: options.codeChallengeMethod as string,
     };
     this.logger.debug("Authorization Parameter", authzParam);
 
     const authzUrl = this.yconnect.generateAuthzURL(authzParam);
     this.logger.debug("Authorization URL", authzUrl);
-
     open(authzUrl);
 
     const callbackUrl = await this.callbackServer.create();
