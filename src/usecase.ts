@@ -48,7 +48,7 @@ export class Usecase {
     if (callbackUrl.includes("?")) {
       authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams);
     }
-    this.logger.info("Authorization Response", authzResponse);
+    this.logger.debug("Authorization Response", authzResponse);
 
     if (!authzResponse.code) {
       // - implicit flow

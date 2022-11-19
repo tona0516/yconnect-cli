@@ -25,7 +25,7 @@ export class DependencyInjection {
   }
 
   private init(): TsyringeDependencyContainer {
-    container.register("Logger", { useClass: Logger });
+    container.registerSingleton("Logger", Logger);
     container.register("CallbackServer", { useClass: CallbackServer });
     container.register("UserinfoApi", { useClass: UserinfoApi });
     container.register("YConnect", { useClass: YConnect });
