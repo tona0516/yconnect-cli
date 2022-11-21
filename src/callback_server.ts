@@ -7,8 +7,7 @@ export class CallbackServer {
   async create(
     frontendPath = "front",
     backendPath = "back",
-    port = 3000,
-    windowCloseTimeoutSec = 5
+    port = 3000
   ): Promise<string> {
     return new Promise((resolve) => {
       const express = Express();
@@ -21,7 +20,6 @@ export class CallbackServer {
           res.render("./index.ejs", {
             port: port,
             backendPath: backendPath,
-            windowCloseTimeoutSec: windowCloseTimeoutSec,
           });
         }
       );

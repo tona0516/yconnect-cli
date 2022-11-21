@@ -4,18 +4,10 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script>
     let baseUrl = "http://localhost:<%= port %>/<%= backendPath %>";
-    let closeTimeoutSec = "<%= windowCloseTimeoutSec %>";
     let contents = `
+        <h1>yconnect-cli</h1>
         <p>Terminal shows a result. </p>
-        <p>Automatically close this tab after ${closeTimeoutSec} seconds.</p>
     `;
-
-    function onResponse(response) {
-      document.write(contents);
-      setTimeout(function () {
-        window.close();
-      }, closeTimeoutSec * 1000);
-    }
 
     function main() {
       let url =
@@ -23,10 +15,10 @@
       axios
         .get(url)
         .then(function (response) {
-          onResponse(response);
+          document.write(contents);
         })
         .catch(function (error) {
-          onResponse(response);
+          document.write(contents);
         });
     }
 
