@@ -24,7 +24,7 @@ test.each([
   [200, normalResponee],
   [400, errorResponse],
   [500, errorResponse],
-])("get status_code=%i", async (statusCode, expectedResponse) => {
+])("get() status_code=%i", async (statusCode, expectedResponse) => {
   const mockLogger = new Logger();
   const userinfoApi = new UserinfoApi(mockLogger);
 

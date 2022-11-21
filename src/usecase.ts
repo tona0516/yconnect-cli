@@ -1,4 +1,3 @@
-import { OptionValues } from "commander";
 import open from "open";
 import { UserinfoApi } from "./userinfoapi";
 import { CallbackServer } from "./callback_server";
@@ -15,7 +14,8 @@ export class Usecase {
     @inject("UserinfoApi") private userinfoApi: UserinfoApi
   ) {}
 
-  async authorize(options: OptionValues) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async authorize(options: any) {
     const authzParam: AuthorizationParam = {
       responseType: options.responseType as string[],
       clientId: options.clientId as string,
@@ -48,16 +48,12 @@ export class Usecase {
     if (callbackUrl.includes("?")) {
       authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams);
     }
-    this.logger.debug("Authorization Response", authzResponse);
+    this.logger.info("Authorization Response", authzResponse);
 
     if (!authzResponse.code) {
       // - implicit flow
       // - bail=1 and no consent
       // - respond error
-      this.logger.info(
-        "Message",
-        "No 'code' parameter in authorization response."
-      );
       return;
     }
 
@@ -71,7 +67,8 @@ export class Usecase {
     this.logger.info("Token Response", tokenResponse);
   }
 
-  async refresh(options: OptionValues) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async refresh(options: any) {
     const tokenResponse = await this.yconnect.refreshToken({
       clientId: options.clientId as string,
       refreshToken: options.refreshToken as string,
@@ -81,7 +78,8 @@ export class Usecase {
     this.logger.info("Token Response", tokenResponse);
   }
 
-  async fetchUserinfo(options: OptionValues) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async fetchUserinfo(options: any) {
     const userinfoResponse = await this.userinfoApi.get(
       options.accessToken as string
     );

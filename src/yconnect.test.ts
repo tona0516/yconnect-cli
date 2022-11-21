@@ -35,7 +35,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test("generateAuthzURL minimum", () => {
+test("generateAuthzURL() minimum params", () => {
   const authzParam: AuthorizationParam = {
     responseType: ["code"],
     clientId: "dj00aiZpPWdSem5VY0hCWGdTaCZzPWNvbnN1bWVyc2VjcmV0Jng9MTg-",
@@ -56,7 +56,7 @@ test("generateAuthzURL minimum", () => {
   expect(actual.searchParams.get("scope")).toBe("openid");
 });
 
-test("generateAuthzURL full", () => {
+test("generateAuthzURL() full params", () => {
   const authzParam: AuthorizationParam = {
     responseType: ["code", "id_token", "token"],
     clientId: "dj00aiZpPWdSem5VY0hCWGdTaCZzPWNvbnN1bWVyc2VjcmV0Jng9MTg-",
@@ -99,7 +99,7 @@ test.each([
   [200, issueNormalResponse],
   [400, errorResponse],
   [500, errorResponse],
-])("issueToken status_code=%i", async (statusCode, expectedResponse) => {
+])("issueToken() status_code=%i", async (statusCode, expectedResponse) => {
   const issueTokenParam: IssueTokenParam = {
     clientId: "dj00aiZpPWdSem5VY0hCWGdTaCZzPWNvbnN1bWVyc2VjcmV0Jng9MTg-",
     redirectUri: "http://example.jp",
@@ -125,7 +125,7 @@ test.each([
   [200, refreshNormalResponse],
   [400, errorResponse],
   [500, errorResponse],
-])("refreshToken status_code=%i", async (statusCode, expectedResponse) => {
+])("refreshToken() status_code=%i", async (statusCode, expectedResponse) => {
   const issueTokenParam: RefreshTokenParam = {
     clientId: "dj00aiZpPWdSem5VY0hCWGdTaCZzPWNvbnN1bWVyc2VjcmV0Jng9MTg-",
     refreshToken: "123",
