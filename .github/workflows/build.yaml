@@ -1,0 +1,24 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: yarn install --frozen-lockfile
+      - run: yarn run build
+      - run: yarn run test
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add -f ./dist
+          git commit -m "[skip ci] build"
+          git push
+
