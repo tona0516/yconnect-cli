@@ -1,12 +1,10 @@
 import "reflect-metadata";
 import { Command, Option } from "commander";
 import { DependencyInjection } from "./dependency_injection";
-import { Logger } from "./logger";
 import { Usecase } from "./usecase";
 
 function main() {
   const container = DependencyInjection.getInstance().container;
-  const logger = container.resolve<Logger>("Logger");
   const usecase = container.resolve<Usecase>("Usecase");
   const program = new Command();
 
@@ -41,8 +39,6 @@ function main() {
     .option("--code-challenge-method <string>", "code_challenge_method")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
-      if (options.debug) logger.enableDebug();
-      logger.debug("Input parameters", options);
       usecase.authorize(options);
     });
 
@@ -54,8 +50,6 @@ function main() {
     .option("--client-secret <string>", "Client Secret")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
     .action((options) => {
-      if (options.debug) logger.enableDebug();
-      logger.debug("Input parameters", options);
       usecase.refresh(options);
     });
 
@@ -64,8 +58,6 @@ function main() {
     .description("Get user data from UserInfoAPI.")
     .requiredOption("-a, --access-token <string>", "Access Token")
     .action((options) => {
-      if (options.debug) logger.enableDebug();
-      logger.debug("Input parameters", options);
       usecase.fetchUserinfo(options);
     });
 

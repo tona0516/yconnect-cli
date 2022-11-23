@@ -16,6 +16,9 @@ export class Usecase {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async authorize(options: any) {
+    if (options.debug) this.logger.enableDebug();
+    this.logger.debug("Input parameters", options);
+
     const authzParam: AuthorizationParam = {
       responseType: options.responseType as string[],
       clientId: options.clientId as string,
@@ -70,6 +73,9 @@ export class Usecase {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async refresh(options: any) {
+    if (options.debug) this.logger.enableDebug();
+    this.logger.debug("Input parameters", options);
+
     const tokenResponse = await this.yconnect.refreshToken({
       clientId: options.clientId as string,
       refreshToken: options.refreshToken as string,
@@ -81,6 +87,9 @@ export class Usecase {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async fetchUserinfo(options: any) {
+    if (options.debug) this.logger.enableDebug();
+    this.logger.debug("Input parameters", options);
+
     const userinfoResponse = await this.userinfoApi.get(
       options.accessToken as string
     );

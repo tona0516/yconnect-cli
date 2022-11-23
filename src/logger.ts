@@ -5,7 +5,7 @@ import { singleton } from "tsyringe";
 export class Logger implements Logger {
   private isDebug = false;
 
-  enableDebug(): void {
+  enableDebug() {
     this.isDebug = true;
   }
 
