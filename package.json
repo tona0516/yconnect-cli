@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/tona0516/yconnect-cli.git"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI for Yahoo! Identity Federation",
   "author": "tona0516 <tonango.0516@gmail.com>",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "lint-fix": "run-s lint-fix:eslint lint-fix:prettier lint-fix:prettier-html",
     "lint-fix:eslint": "eslint --cache --fix ./src",
     "lint-fix:prettier": "prettier --write ./src",
-    "lint-fix:prettier-html": "prettier --parser html --write ./view/*.ejs"
+    "lint-fix:prettier-html": "prettier --parser html --write ./src/view/*.ejs"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",
