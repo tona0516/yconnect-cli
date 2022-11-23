@@ -19,7 +19,7 @@ let CallbackServer = class CallbackServer {
         return new Promise((resolve) => {
             const express = (0, express_1.default)();
             express.set("view engine", "ejs");
-            express.set("views", `${__dirname}/view`);
+            express.set("views", `${__dirname}/../view`);
             express.get(`/${frontendPath}`, (req, res) => {
                 res.render("./index.ejs", {
                     port: port,
