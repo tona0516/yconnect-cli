@@ -13,14 +13,13 @@ exports.CallbackServer = void 0;
 const url_1 = __importDefault(require("url"));
 const express_1 = __importDefault(require("express"));
 const tsyringe_1 = require("tsyringe");
-const path_1 = __importDefault(require("path"));
 let CallbackServer = class CallbackServer {
     server;
     async create(frontendPath = "front", backendPath = "back", port = 3000) {
         return new Promise((resolve) => {
             const express = (0, express_1.default)();
             express.set("view engine", "ejs");
-            express.set("views", path_1.default.resolve("./view"));
+            express.set("views", `${__dirname}/view`);
             express.get(`/${frontendPath}`, (req, res) => {
                 res.render("./index.ejs", {
                     port: port,
