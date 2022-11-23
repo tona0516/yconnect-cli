@@ -1,8 +1,11 @@
 {
-  "name": "yconnect-cli",
+  "name": "@tona0516/yconnect-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tona0516/yconnect-cli.git"
+  },
   "version": "1.0.0",
   "description": "CLI for Yahoo! Identity Federation",
-  "repository": "git@github.com:tona0516/yconnect-cli.git",
   "author": "tona0516 <tonango.0516@gmail.com>",
   "license": "MIT",
   "bin": {
