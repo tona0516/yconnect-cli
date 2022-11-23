@@ -2,6 +2,7 @@ import url from "url";
 import Express from "express";
 import { injectable } from "tsyringe";
 import { Server } from "http";
+import path from "path";
 
 @injectable()
 export class CallbackServer {
@@ -15,7 +16,7 @@ export class CallbackServer {
     return new Promise((resolve) => {
       const express = Express();
       express.set("view engine", "ejs");
-      express.set("views", "./view");
+      express.set("views", path.resolve("./view"));
 
       express.get(
         `/${frontendPath}`,
