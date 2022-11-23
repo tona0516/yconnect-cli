@@ -15,7 +15,7 @@ export class CallbackServer {
     return new Promise((resolve) => {
       const express = Express();
       express.set("view engine", "ejs");
-      express.set("views", `${__dirname}/view`);
+      express.set("views", `${__dirname}/../view`);
 
       express.get(
         `/${frontendPath}`,
