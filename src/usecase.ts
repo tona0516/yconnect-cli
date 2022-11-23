@@ -38,6 +38,7 @@ export class Usecase {
 
     const callbackUrl = await this.callbackServer.create();
     this.logger.debug("Callback URL", callbackUrl);
+    this.callbackServer.close();
 
     let authzResponse: { [key: string]: string } = {};
     if (callbackUrl.includes("#")) {

@@ -1,9 +1,12 @@
 import url from "url";
 import Express from "express";
 import { injectable } from "tsyringe";
+import { Server } from "http";
 
 @injectable()
 export class CallbackServer {
+  server: Server | undefined;
+
   async create(
     frontendPath = "front",
     backendPath = "back",
@@ -28,8 +31,6 @@ export class CallbackServer {
         `/${backendPath}`,
         (req: Express.Request, res: Express.Response) => {
           res.sendStatus(200);
-          server.closeAllConnections();
-          server.close();
           const callbackUrl = decodeURIComponent(
             url.parse(req.url, true).query.callback_url as string
           );
@@ -37,7 +38,12 @@ export class CallbackServer {
         }
       );
 
-      const server = express.listen(port);
+      this.server = express.listen(port);
     });
+  }
+
+  close() {
+    this.server?.closeAllConnections();
+    this.server?.close();
   }
 }
