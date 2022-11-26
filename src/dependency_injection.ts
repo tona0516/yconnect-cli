@@ -1,3 +1,4 @@
+import { IdTokenVerifier } from "./idtoken_verifier";
 import {
   container,
   DependencyContainer as TsyringeDependencyContainer,
@@ -29,6 +30,7 @@ export class DependencyInjection {
     container.register("CallbackServer", { useClass: CallbackServer });
     container.register("UserinfoApi", { useClass: UserinfoApi });
     container.register("YConnect", { useClass: YConnect });
+    container.register("IdTokenVerifier", { useClass: IdTokenVerifier });
     container.register("Usecase", { useClass: Usecase });
 
     return container;

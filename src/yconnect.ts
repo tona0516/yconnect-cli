@@ -7,6 +7,7 @@ const URL = {
   BASE: "https://auth.login.yahoo.co.jp",
   AUTHORIZATION: "yconnect/v2/authorization",
   TOKEN: "yconnect/v2/token",
+  PUBLIC_KEYS: "yconnect/v2/public-keys",
 };
 
 const GrantType = {
@@ -120,6 +121,17 @@ export class YConnect {
 
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
+      .then(function (response) {
+        return response.data;
+      })
+      .catch(function (error) {
+        return error.response.data;
+      });
+  }
+
+  async publicKeys(): Promise<{ [key: string]: string }> {
+    return await axios
+      .get(`${URL.BASE}/${URL.PUBLIC_KEYS}`)
       .then(function (response) {
         return response.data;
       })

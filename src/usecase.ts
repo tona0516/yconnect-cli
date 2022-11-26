@@ -4,6 +4,7 @@ import { CallbackServer } from "./callback_server";
 import { AuthorizationParam, YConnect } from "./yconnect";
 import { Logger } from "./logger";
 import { inject, injectable } from "tsyringe";
+import { IdTokenVerifier } from "./idtoken_verifier";
 
 @injectable()
 export class Usecase {
@@ -11,7 +12,8 @@ export class Usecase {
     @inject("Logger") private logger: Logger,
     @inject("CallbackServer") private callbackServer: CallbackServer,
     @inject("YConnect") private yconnect: YConnect,
-    @inject("UserinfoApi") private userinfoApi: UserinfoApi
+    @inject("UserinfoApi") private userinfoApi: UserinfoApi,
+    @inject("IdTokenVerifier") private idTokenVerifier: IdTokenVerifier
   ) {}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,6 +56,20 @@ export class Usecase {
     }
     this.logger.info("Authorization Response", authzResponse);
 
+    if (options.verify && authzResponse.id_token) {
+      const result = await this.idTokenVerifier.verify(
+        authzResponse.id_token,
+        options.clientId as string,
+        options.nonce as string,
+        authzResponse.access_token,
+        authzResponse.code
+      );
+
+      if (!result) {
+        return;
+      }
+    }
+
     if (!authzResponse.code) {
       // - implicit flow
       // - bail=1 and no consent
@@ -67,8 +83,21 @@ export class Usecase {
       code: authzResponse.code,
       clientSecret: options.clientSecret as string,
     });
-
     this.logger.info("Token Response", tokenResponse);
+
+    if (options.verify) {
+      const result = await this.idTokenVerifier.verify(
+        tokenResponse.id_token,
+        options.clientId as string,
+        options.nonce as string,
+        tokenResponse.access_token,
+        undefined
+      );
+
+      if (!result) {
+        return;
+      }
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

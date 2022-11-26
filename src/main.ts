@@ -38,6 +38,9 @@ function main() {
     .option("--code-challenge <string>", "code_challenge")
     .option("--code-challenge-method <string>", "code_challenge_method")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
+    .addOption(
+      new Option("--verify", "enable ID Token verification").default(false)
+    )
     .action((options) => {
       usecase.authorize(options);
     });
