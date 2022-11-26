@@ -20,7 +20,7 @@
     "lint-fix": "run-s lint-fix:eslint lint-fix:prettier lint-fix:prettier-html",
     "lint-fix:eslint": "eslint --cache --fix ./src",
     "lint-fix:prettier": "prettier --write ./src",
-    "lint-fix:prettier-html": "prettier --parser html --write ./src/view/*.ejs"
+    "lint-fix:prettier-html": "prettier --parser html --write ./view/*.ejs"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",
