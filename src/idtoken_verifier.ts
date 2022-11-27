@@ -34,14 +34,14 @@ interface Payload {
 export class IdTokenVerifier {
   constructor(@inject("Logger") private logger: Logger) {}
 
-  async verify(
+  verify(
     idToken: string,
     clientId: string,
     nonce: string,
     publicKeysResponse: { [key: string]: string },
     accessToken?: string,
     code?: string
-  ): Promise<[boolean, IdTokenVerificationResult]> {
+  ): [boolean, IdTokenVerificationResult] {
     const result: IdTokenVerificationResult = {};
 
     const kid = this.extractKid(idToken);
@@ -119,7 +119,7 @@ export class IdTokenVerifier {
 
     let isValid = true;
     Object.values(result).forEach((value) => {
-      if (value instanceof Boolean && value === false) {
+      if (value === false) {
         isValid = false;
         return;
       }
@@ -134,7 +134,6 @@ export class IdTokenVerifier {
       const decodedHeader = base64url.decode(rawHeader);
       return JSON.parse(decodedHeader).kid;
     } catch (error) {
-      this.logger.error(LogTitle, error);
       return undefined;
     }
   }
@@ -145,9 +144,10 @@ export class IdTokenVerifier {
     publicKeysResponse: { [key: string]: string }
   ): Payload | undefined {
     try {
-      return jwt.verify(idToken, publicKeysResponse[kid]) as Payload;
+      return jwt.verify(idToken, publicKeysResponse[kid], {
+        ignoreExpiration: true,
+      }) as Payload;
     } catch (error) {
-      this.logger.error(LogTitle, error);
       return undefined;
     }
   }
@@ -165,7 +165,6 @@ export class IdTokenVerifier {
         return false;
       }
     } catch (error) {
-      this.logger.error(LogTitle, error);
       return false;
     }
   }
@@ -173,17 +172,16 @@ export class IdTokenVerifier {
   private verifyCHash(payload: Payload, code: string): boolean {
     try {
       const expectedHash = this.createHash(code);
-      if (payload.at_hash === expectedHash) {
+      if (payload.c_hash === expectedHash) {
         return true;
       } else {
         this.logger.debug(`${LogTitle} - invalid c_hash`, {
           expected: expectedHash,
-          actual: payload.at_hash,
+          actual: payload.c_hash,
         });
         return false;
       }
     } catch (error) {
-      this.logger.error(LogTitle, error);
       return false;
     }
   }

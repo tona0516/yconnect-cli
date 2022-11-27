@@ -68,7 +68,7 @@ export class Usecase {
 
     if (options.verify) {
       if (authzResponse.id_token) {
-        const [isValid, result] = await this.idTokenVerifier.verify(
+        const [isValid, result] = this.idTokenVerifier.verify(
           authzResponse.id_token,
           options.clientId as string,
           options.nonce as string,
@@ -107,7 +107,7 @@ export class Usecase {
     }
 
     if (options.verify) {
-      const [isValid, result] = await this.idTokenVerifier.verify(
+      const [isValid, result] = this.idTokenVerifier.verify(
         tokenResponse.id_token,
         options.clientId as string,
         options.nonce as string,
