@@ -98,6 +98,7 @@ export class Usecase {
       redirectUri: options.redirectUri as string,
       code: authzResponse.code,
       clientSecret: options.clientSecret as string,
+      codeVerifier: options.codeVerifier as string,
     });
     this.logger.info("Token Response", tokenResponse);
 

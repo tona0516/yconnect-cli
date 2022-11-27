@@ -35,6 +35,7 @@ function main() {
     .option("--display <string>", "display")
     .option("--prompt <string...>", "prompt")
     .option("--max-age <number>", "max_age")
+    .option("--code-verifier <string>", "code_verifier")
     .option("--code-challenge <string>", "code_challenge")
     .option("--code-challenge-method <string>", "code_challenge_method")
     .addOption(new Option("-d, --debug", "debug mode").default(false))
