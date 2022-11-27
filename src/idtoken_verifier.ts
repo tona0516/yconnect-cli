@@ -1,109 +1,196 @@
 import { Logger } from "./logger";
 import { inject, injectable } from "tsyringe";
-import { YConnect } from "./yconnect";
 import base64url from "base64url";
 import jwt from "jsonwebtoken";
 import { createHash } from "crypto";
 
 const ISS = "https://auth.login.yahoo.co.jp/yconnect/v2";
+const LogTitle = "ID Token verification result";
+
+export interface IdTokenVerificationResult {
+  extract_kid?: boolean;
+  valid_signature?: boolean;
+  valid_iss?: boolean;
+  valid_aud?: boolean;
+  valid_nonce?: boolean;
+  valid_at_hash?: boolean;
+  valid_c_hash?: boolean;
+  not_expired?: boolean;
+}
+
+interface Payload {
+  iss: string;
+  sub: string;
+  aud: string[];
+  exp: number;
+  iat: number;
+  nonce?: string;
+  amr?: string[];
+  at_hash?: string;
+  c_hash?: string;
+}
 
 @injectable()
 export class IdTokenVerifier {
-  constructor(
-    @inject("Logger") private logger: Logger,
-    @inject("YConnect") private yconnect: YConnect
-  ) {}
+  constructor(@inject("Logger") private logger: Logger) {}
 
   async verify(
     idToken: string,
     clientId: string,
     nonce: string,
+    publicKeysResponse: { [key: string]: string },
     accessToken?: string,
     code?: string
-  ): Promise<boolean> {
-    const [header] = idToken.split(".");
-    const decodedHeader = base64url.decode(header);
-    const headerJson = JSON.parse(decodedHeader);
+  ): Promise<[boolean, IdTokenVerificationResult]> {
+    const result: IdTokenVerificationResult = {};
 
-    const publicKeysResponse = await this.yconnect.publicKeys();
-
-    this.logger.debug("PublicKeys Response", publicKeysResponse);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let payloadJson: any;
-    try {
-      payloadJson = jwt.verify(idToken, publicKeysResponse[headerJson.kid]);
-    } catch (error) {
-      this.logger.info(
-        "ID Token verification result",
-        "Invalid signature error"
-      );
-      return false;
+    const kid = this.extractKid(idToken);
+    if (!kid) {
+      result.extract_kid = false;
+      return [false, result];
     }
+    result.extract_kid = true;
 
-    if (payloadJson.iss !== ISS) {
-      this.logger.info("ID Token verification result - invalid iss", {
+    const payload = this.verifySignature(idToken, kid, publicKeysResponse);
+    if (!payload) {
+      result.valid_signature = false;
+      return [false, result];
+    }
+    result.valid_signature = true;
+
+    if (payload.iss === ISS) {
+      result.valid_iss = true;
+    } else {
+      this.logger.debug(`${LogTitle} - invalid iss`, {
         expected: ISS,
-        actual: payloadJson.iss,
+        actual: payload.iss,
       });
-      return false;
+      result.valid_iss = false;
     }
 
-    if (!payloadJson.aud.includes(clientId)) {
-      this.logger.info(
-        "ID Token verification result - Client ID is not contained aud",
-        {
-          target: clientId,
-          actual: payloadJson.aud,
-        }
-      );
-      return false;
+    if (payload.aud.includes(clientId)) {
+      result.valid_aud = true;
+    } else {
+      this.logger.debug(`${LogTitle} - aud is not contained the Client ID`, {
+        target: clientId,
+        actual: payload.aud,
+      });
+      result.valid_aud = false;
     }
 
-    if (nonce && payloadJson.nonce !== nonce) {
-      this.logger.info("ID Token verification result - invalid nonce", {
-        expected: nonce,
-        actual: payloadJson.nonce,
-      });
-      return false;
+    if (nonce) {
+      if (payload.nonce === nonce) {
+        result.valid_nonce = true;
+      } else {
+        this.logger.debug(`${LogTitle} - invalid nonce`, {
+          expected: nonce,
+          actual: payload.nonce,
+        });
+        result.valid_nonce = false;
+      }
     }
 
     if (accessToken) {
-      const hash = createHash("sha256").update(accessToken).digest();
-      const halfOfHash = hash.slice(0, hash.length / 2);
-      const expectedAtHash = base64url.encode(halfOfHash);
-      if (expectedAtHash !== payloadJson.at_hash) {
-        this.logger.info("ID Token verification result - invalid at_hash", {
-          expected: expectedAtHash,
-          actual: payloadJson.at_hash,
-        });
-        return false;
+      if (this.verifyATHash(payload, accessToken)) {
+        result.valid_at_hash = true;
+      } else {
+        result.valid_at_hash = false;
       }
     }
 
     if (code) {
-      const hash = createHash("sha256").update(code).digest();
-      const halfOfHash = hash.slice(0, hash.length / 2);
-      const expectedCHash = base64url.encode(halfOfHash);
-      if (expectedCHash !== payloadJson.c_hash) {
-        this.logger.info("ID Token verification result - invalid c_hash", {
-          expected: expectedCHash,
-          actual: payloadJson.c_hash,
-        });
-        return false;
+      if (this.verifyCHash(payload, code)) {
+        result.valid_c_hash = true;
+      } else {
+        result.valid_c_hash = false;
       }
     }
 
     const currentTimeStamp = Date.now() / 1000;
-
-    if (payloadJson.exp <= currentTimeStamp) {
-      this.logger.info("ID Token verification result - expired", {
+    if (payload.exp > currentTimeStamp) {
+      result.not_expired = true;
+    } else {
+      this.logger.debug(`${LogTitle} - expired`, {
         current: currentTimeStamp,
-        exp: payloadJson.exp,
+        exp: payload.exp,
       });
-      return false;
+      result.not_expired = false;
     }
 
-    return true;
+    let isValid = true;
+    Object.values(result).forEach((value) => {
+      if (value instanceof Boolean && value === false) {
+        isValid = false;
+        return;
+      }
+    });
+
+    return [isValid, result];
+  }
+
+  private extractKid(idToken: string): string | undefined {
+    try {
+      const [rawHeader] = idToken.split(".");
+      const decodedHeader = base64url.decode(rawHeader);
+      return JSON.parse(decodedHeader).kid;
+    } catch (error) {
+      this.logger.error(LogTitle, error);
+      return undefined;
+    }
+  }
+
+  private verifySignature(
+    idToken: string,
+    kid: string,
+    publicKeysResponse: { [key: string]: string }
+  ): Payload | undefined {
+    try {
+      return jwt.verify(idToken, publicKeysResponse[kid]) as Payload;
+    } catch (error) {
+      this.logger.error(LogTitle, error);
+      return undefined;
+    }
+  }
+
+  private verifyATHash(payload: Payload, accessToken: string): boolean {
+    try {
+      const expectedHash = this.createHash(accessToken);
+      if (payload.at_hash === expectedHash) {
+        return true;
+      } else {
+        this.logger.debug(`${LogTitle} - invalid at_hash`, {
+          expected: expectedHash,
+          actual: payload.at_hash,
+        });
+        return false;
+      }
+    } catch (error) {
+      this.logger.error(LogTitle, error);
+      return false;
+    }
+  }
+
+  private verifyCHash(payload: Payload, code: string): boolean {
+    try {
+      const expectedHash = this.createHash(code);
+      if (payload.at_hash === expectedHash) {
+        return true;
+      } else {
+        this.logger.debug(`${LogTitle} - invalid c_hash`, {
+          expected: expectedHash,
+          actual: payload.at_hash,
+        });
+        return false;
+      }
+    } catch (error) {
+      this.logger.error(LogTitle, error);
+      return false;
+    }
+  }
+
+  private createHash(value: string): string {
+    const hash = createHash("sha256").update(value).digest();
+    const halfOfHash = hash.slice(0, hash.length / 2);
+    return base64url.encode(halfOfHash);
   }
 }

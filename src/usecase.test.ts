@@ -4,6 +4,7 @@ import { UserinfoApi } from "./userinfoapi";
 import { CallbackServer } from "./callback_server";
 import { YConnect } from "./yconnect";
 import { Usecase } from "./usecase";
+import { IdTokenVerifier } from "./idtoken_verifier";
 
 jest.mock("./logger");
 jest.mock("./userinfoapi");
@@ -16,13 +17,21 @@ let callbackServer: CallbackServer;
 let yconnect: YConnect;
 let userinfoApi: UserinfoApi;
 let usecase: Usecase;
+let idtokenVerifier: IdTokenVerifier;
 
 beforeEach(() => {
   logger = new Logger();
   callbackServer = new CallbackServer();
   yconnect = new YConnect(logger);
   userinfoApi = new UserinfoApi(logger);
-  usecase = new Usecase(logger, callbackServer, yconnect, userinfoApi);
+  idtokenVerifier = new IdTokenVerifier(logger);
+  usecase = new Usecase(
+    logger,
+    callbackServer,
+    yconnect,
+    userinfoApi,
+    idtokenVerifier
+  );
   jest.spyOn(logger, "info").mockImplementation();
 });
 

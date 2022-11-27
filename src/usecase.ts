@@ -56,17 +56,33 @@ export class Usecase {
     }
     this.logger.info("Authorization Response", authzResponse);
 
-    if (options.verify && authzResponse.id_token) {
-      const result = await this.idTokenVerifier.verify(
-        authzResponse.id_token,
-        options.clientId as string,
-        options.nonce as string,
-        authzResponse.access_token,
-        authzResponse.code
-      );
+    if (authzResponse.error) {
+      return;
+    }
 
-      if (!result) {
-        return;
+    let publicKeysResponse: { [key: string]: string } = {};
+    if (options.verify) {
+      publicKeysResponse = await this.yconnect.publicKeys();
+      this.logger.debug("`Public keys Response", publicKeysResponse);
+    }
+
+    if (options.verify) {
+      if (authzResponse.id_token) {
+        const [isValid, result] = await this.idTokenVerifier.verify(
+          authzResponse.id_token,
+          options.clientId as string,
+          options.nonce as string,
+          publicKeysResponse,
+          authzResponse.access_token,
+          authzResponse.code
+        );
+
+        this.logger.info("ID Token verification", result);
+
+        if (!isValid) {
+          this.logger.info("ID Token verification", "ID Token is invalid.");
+          return;
+        }
       }
     }
 
@@ -85,16 +101,24 @@ export class Usecase {
     });
     this.logger.info("Token Response", tokenResponse);
 
+    if (tokenResponse.error) {
+      return;
+    }
+
     if (options.verify) {
-      const result = await this.idTokenVerifier.verify(
+      const [isValid, result] = await this.idTokenVerifier.verify(
         tokenResponse.id_token,
         options.clientId as string,
         options.nonce as string,
+        publicKeysResponse,
         tokenResponse.access_token,
         undefined
       );
 
-      if (!result) {
+      this.logger.info("ID Token verification", result);
+
+      if (!isValid) {
+        this.logger.info("ID Token verification", "ID Token is invalid.");
         return;
       }
     }
