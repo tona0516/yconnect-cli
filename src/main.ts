@@ -11,7 +11,7 @@ function main() {
   program
     .name("yconnect-cli")
     .description("CLI for Yahoo! Identity Federation")
-    .version("1.0.5", "-v, --version");
+    .version("1.1.0", "-v, --version");
 
   program
     .command("auth")
