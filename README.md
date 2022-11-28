@@ -1,4 +1,7 @@
 # yconnect-cli
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tona0516/yconnect-cli/Build)
+![GitHub](https://img.shields.io/github/license/tona0516/yconnect-cli)
+![npm](https://img.shields.io/npm/v/@tona0516/yconnect-cli)
 
 ## Overview
 CLI for Yahoo! Identity Federation. (UNOFFICIAL)
