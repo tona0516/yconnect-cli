@@ -27,6 +27,11 @@ let Logger = class Logger {
         console.info(message);
         console.info();
     }
+    error(title, message) {
+        console.error(`> ${title}`);
+        console.error(message);
+        console.error();
+    }
 };
 Logger = __decorate([
     (0, tsyringe_1.singleton)()

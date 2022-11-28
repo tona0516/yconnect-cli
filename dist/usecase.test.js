@@ -6,6 +6,7 @@ const userinfoapi_1 = require("./userinfoapi");
 const callback_server_1 = require("./callback_server");
 const yconnect_1 = require("./yconnect");
 const usecase_1 = require("./usecase");
+const idtoken_verifier_1 = require("./idtoken_verifier");
 jest.mock("./logger");
 jest.mock("./userinfoapi");
 jest.mock("./yconnect");
@@ -16,12 +17,14 @@ let callbackServer;
 let yconnect;
 let userinfoApi;
 let usecase;
+let idtokenVerifier;
 beforeEach(() => {
     logger = new logger_1.Logger();
     callbackServer = new callback_server_1.CallbackServer();
     yconnect = new yconnect_1.YConnect(logger);
     userinfoApi = new userinfoapi_1.UserinfoApi(logger);
-    usecase = new usecase_1.Usecase(logger, callbackServer, yconnect, userinfoApi);
+    idtokenVerifier = new idtoken_verifier_1.IdTokenVerifier(logger);
+    usecase = new usecase_1.Usecase(logger, callbackServer, yconnect, userinfoApi, idtokenVerifier);
     jest.spyOn(logger, "info").mockImplementation();
 });
 afterEach(() => {

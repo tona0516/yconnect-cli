@@ -22,16 +22,19 @@ const callback_server_1 = require("./callback_server");
 const yconnect_1 = require("./yconnect");
 const logger_1 = require("./logger");
 const tsyringe_1 = require("tsyringe");
+const idtoken_verifier_1 = require("./idtoken_verifier");
 let Usecase = class Usecase {
     logger;
     callbackServer;
     yconnect;
     userinfoApi;
-    constructor(logger, callbackServer, yconnect, userinfoApi) {
+    idTokenVerifier;
+    constructor(logger, callbackServer, yconnect, userinfoApi, idTokenVerifier) {
         this.logger = logger;
         this.callbackServer = callbackServer;
         this.yconnect = yconnect;
         this.userinfoApi = userinfoApi;
+        this.idTokenVerifier = idTokenVerifier;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async authorize(options) {
@@ -67,6 +70,24 @@ let Usecase = class Usecase {
             authzResponse = Object.fromEntries(new URL(callbackUrl).searchParams);
         }
         this.logger.info("Authorization Response", authzResponse);
+        if (authzResponse.error) {
+            return;
+        }
+        let publicKeysResponse = {};
+        if (options.verify) {
+            publicKeysResponse = await this.yconnect.publicKeys();
+            this.logger.debug("`Public keys Response", publicKeysResponse);
+        }
+        if (options.verify) {
+            if (authzResponse.id_token) {
+                const [isValid, result] = this.idTokenVerifier.verify(authzResponse.id_token, options.clientId, options.nonce, publicKeysResponse, authzResponse.access_token, authzResponse.code);
+                this.logger.info("ID Token verification", result);
+                if (!isValid) {
+                    this.logger.info("ID Token verification", "ID Token is invalid.");
+                    return;
+                }
+            }
+        }
         if (!authzResponse.code) {
             // - implicit flow
             // - bail=1 and no consent
@@ -78,8 +99,20 @@ let Usecase = class Usecase {
             redirectUri: options.redirectUri,
             code: authzResponse.code,
             clientSecret: options.clientSecret,
+            codeVerifier: options.codeVerifier,
         });
         this.logger.info("Token Response", tokenResponse);
+        if (tokenResponse.error) {
+            return;
+        }
+        if (options.verify) {
+            const [isValid, result] = this.idTokenVerifier.verify(tokenResponse.id_token, options.clientId, options.nonce, publicKeysResponse, tokenResponse.access_token, undefined);
+            this.logger.info("ID Token verification", result);
+            if (!isValid) {
+                this.logger.info("ID Token verification", "ID Token is invalid.");
+                return;
+            }
+        }
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async refresh(options) {
@@ -108,10 +141,12 @@ Usecase = __decorate([
     __param(1, (0, tsyringe_1.inject)("CallbackServer")),
     __param(2, (0, tsyringe_1.inject)("YConnect")),
     __param(3, (0, tsyringe_1.inject)("UserinfoApi")),
+    __param(4, (0, tsyringe_1.inject)("IdTokenVerifier")),
     __metadata("design:paramtypes", [logger_1.Logger,
         callback_server_1.CallbackServer,
         yconnect_1.YConnect,
-        userinfoapi_1.UserinfoApi])
+        userinfoapi_1.UserinfoApi,
+        idtoken_verifier_1.IdTokenVerifier])
 ], Usecase);
 exports.Usecase = Usecase;
 //# sourceMappingURL=usecase.js.map
