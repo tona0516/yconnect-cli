@@ -10,7 +10,7 @@ function main() {
     program
         .name("yconnect-cli")
         .description("CLI for Yahoo! Identity Federation")
-        .version("1.0.5", "-v, --version");
+        .version("1.1.0", "-v, --version");
     program
         .command("auth")
         .description("Authorize and getting tokens.")
@@ -27,9 +27,11 @@ function main() {
         .option("--display <string>", "display")
         .option("--prompt <string...>", "prompt")
         .option("--max-age <number>", "max_age")
+        .option("--code-verifier <string>", "code_verifier")
         .option("--code-challenge <string>", "code_challenge")
         .option("--code-challenge-method <string>", "code_challenge_method")
         .addOption(new commander_1.Option("-d, --debug", "debug mode").default(false))
+        .addOption(new commander_1.Option("--verify", "enable ID Token verification").default(false))
         .action((options) => {
         usecase.authorize(options);
     });

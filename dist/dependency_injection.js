@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DependencyInjection = void 0;
+const idtoken_verifier_1 = require("./idtoken_verifier");
 const tsyringe_1 = require("tsyringe");
 const callback_server_1 = require("./callback_server");
 const logger_1 = require("./logger");
@@ -24,6 +25,7 @@ class DependencyInjection {
         tsyringe_1.container.register("CallbackServer", { useClass: callback_server_1.CallbackServer });
         tsyringe_1.container.register("UserinfoApi", { useClass: userinfoapi_1.UserinfoApi });
         tsyringe_1.container.register("YConnect", { useClass: yconnect_1.YConnect });
+        tsyringe_1.container.register("IdTokenVerifier", { useClass: idtoken_verifier_1.IdTokenVerifier });
         tsyringe_1.container.register("Usecase", { useClass: usecase_1.Usecase });
         return tsyringe_1.container;
     }
