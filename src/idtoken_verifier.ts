@@ -3,6 +3,7 @@ import { inject, injectable } from "tsyringe";
 import base64url from "base64url";
 import jwt from "jsonwebtoken";
 import { createHash } from "crypto";
+import { Dic } from "./util";
 
 const ISS = "https://auth.login.yahoo.co.jp/yconnect/v2";
 const LogTitle = "ID Token verification result";
@@ -38,7 +39,7 @@ export class IdTokenVerifier {
     idToken: string,
     clientId: string,
     nonce: string,
-    publicKeysResponse: { [key: string]: string },
+    publicKeysResponse: Dic,
     accessToken?: string,
     code?: string
   ): [boolean, IdTokenVerificationResult] {
@@ -141,7 +142,7 @@ export class IdTokenVerifier {
   private verifySignature(
     idToken: string,
     kid: string,
-    publicKeysResponse: { [key: string]: string }
+    publicKeysResponse: Dic
   ): Payload | undefined {
     try {
       return jwt.verify(idToken, publicKeysResponse[kid], {

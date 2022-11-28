@@ -5,6 +5,7 @@ import { AuthorizationParam, YConnect } from "./yconnect";
 import { Logger } from "./logger";
 import { inject, injectable } from "tsyringe";
 import { IdTokenVerifier } from "./idtoken_verifier";
+import { Dic } from "./util";
 
 @injectable()
 export class Usecase {
@@ -45,7 +46,7 @@ export class Usecase {
     this.logger.debug("Callback URL", callbackUrl);
     this.callbackServer.close();
 
-    let authzResponse: { [key: string]: string } = {};
+    let authzResponse: Dic = {};
     if (callbackUrl.includes("#")) {
       authzResponse = Object.fromEntries(
         new URLSearchParams(new URL(callbackUrl).hash.substring(1))
@@ -60,7 +61,7 @@ export class Usecase {
       return;
     }
 
-    let publicKeysResponse: { [key: string]: string } = {};
+    let publicKeysResponse: Dic = {};
     if (options.verify) {
       publicKeysResponse = await this.yconnect.publicKeys();
       this.logger.debug("`Public keys Response", publicKeysResponse);

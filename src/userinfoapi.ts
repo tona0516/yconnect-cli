@@ -1,5 +1,6 @@
 import axios from "axios";
 import { inject, injectable } from "tsyringe";
+import { Dic } from "./util";
 import { Logger } from "./logger";
 
 const URL = {
@@ -11,7 +12,7 @@ const URL = {
 export class UserinfoApi {
   constructor(@inject("Logger") private logger: Logger) {}
 
-  async get(accessToken: string): Promise<{ [key: string]: string }> {
+  async get(accessToken: string): Promise<Dic> {
     const searchParams = new URLSearchParams();
     searchParams.append("access_token", accessToken);
     return await axios

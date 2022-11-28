@@ -1,6 +1,7 @@
 import axios from "axios";
 import { buildUrl } from "build-url-ts";
 import { inject, injectable } from "tsyringe";
+import { Dic } from "./util";
 import { Logger } from "./logger";
 
 const URL = {
@@ -49,7 +50,7 @@ export class YConnect {
   constructor(@inject("Logger") private logger: Logger) {}
 
   generateAuthzURL(param: AuthorizationParam): string {
-    const query: { [key: string]: string } = {};
+    const query: Dic = {};
     query["response_type"] = [...param.responseType].join(" ");
     query["client_id"] = param.clientId;
     query["redirect_uri"] = param.redirectUri;
@@ -85,7 +86,7 @@ export class YConnect {
     });
   }
 
-  async issueToken(param: IssueTokenParam): Promise<{ [key: string]: string }> {
+  async issueToken(param: IssueTokenParam): Promise<Dic> {
     const searchParams = new URLSearchParams();
     searchParams.append("grant_type", GrantType.CODE);
     searchParams.append("client_id", param.clientId);
@@ -108,9 +109,7 @@ export class YConnect {
       });
   }
 
-  async refreshToken(
-    param: RefreshTokenParam
-  ): Promise<{ [key: string]: string }> {
+  async refreshToken(param: RefreshTokenParam): Promise<Dic> {
     const searchParams = new URLSearchParams();
     searchParams.append("grant_type", GrantType.REFRESH);
     searchParams.append("client_id", param.clientId);
@@ -129,7 +128,7 @@ export class YConnect {
       });
   }
 
-  async publicKeys(): Promise<{ [key: string]: string }> {
+  async publicKeys(): Promise<Dic> {
     return await axios
       .get(`${URL.BASE}/${URL.PUBLIC_KEYS}`)
       .then(function (response) {
