@@ -15,10 +15,17 @@ jobs:
       - run: yarn install --frozen-lockfile
       - run: yarn run build
       - run: yarn run test
-      - run: |
+      - name: Diff
+        id: diff
+        run: |
+          git add -f -N ./dist
+          git diff --exit-code
+        continue-on-error: true
+      - name: Commit & Push
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add -f ./dist
           git commit -m "[skip ci] build"
           git push
-
+        if: steps.diff.outcome == 'failure'
