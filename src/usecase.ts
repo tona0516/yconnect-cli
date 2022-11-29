@@ -73,7 +73,7 @@ export class Usecase {
           authzResponse.code
         );
 
-        this.logger.info("ID Token verification", result);
+        this.logger.info("ID Token Verification", result);
 
         if (!isValid) {
           this.logger.info("ID Token verification", "ID Token is invalid.");
@@ -112,10 +112,10 @@ export class Usecase {
         undefined
       );
 
-      this.logger.info("ID Token verification", result);
+      this.logger.info("ID Token Verification", result);
 
       if (!isValid) {
-        this.logger.info("ID Token verification", "ID Token is invalid.");
+        this.logger.info("ID Token Verification", "ID Token is invalid.");
         return;
       }
     }
