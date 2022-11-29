@@ -24,10 +24,4 @@ export class Logger implements Logger {
     console.info(message);
     console.info();
   }
-
-  error(title: string, message: any) {
-    console.error(`> ${title}`);
-    console.error(message);
-    console.error();
-  }
 }
