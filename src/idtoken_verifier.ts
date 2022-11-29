@@ -189,7 +189,7 @@ export class IdTokenVerifier {
 
   private createHash(value: string): string {
     const hash = createHash("sha256").update(value).digest();
-    const halfOfHash = hash.slice(0, hash.length / 2);
-    return base64url.encode(halfOfHash);
+    const halfOfHash = Uint8Array.from(hash).slice(0, hash.length / 2);
+    return base64url.encode(Buffer.from(halfOfHash));
   }
 }
