@@ -80,10 +80,14 @@ export class YConnect {
       query["code_challenge_method"] = param.codeChallengeMethod;
     }
 
-    return buildUrl(URL.BASE, {
+    const authzUrl = buildUrl(URL.BASE, {
       path: URL.AUTHORIZATION,
       queryParams: query,
     });
+
+    this.logger.debug("Authorization URL", authzUrl);
+
+    return authzUrl;
   }
 
   async issueToken(param: IssueTokenParam): Promise<Dic> {
@@ -101,10 +105,12 @@ export class YConnect {
 
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
-      .then(function (response) {
+      .then((response) => {
+        this.logger.debug("Token - Response", response);
         return response.data;
       })
-      .catch(function (error) {
+      .catch((error) => {
+        this.logger.debug("Token - Error Response", error);
         return error.response.data;
       });
   }
@@ -120,10 +126,12 @@ export class YConnect {
 
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
-      .then(function (response) {
+      .then((response) => {
+        this.logger.debug("Token - Response", response);
         return response.data;
       })
-      .catch(function (error) {
+      .catch((error) => {
+        this.logger.debug("Token - Error Response", error);
         return error.response.data;
       });
   }
@@ -131,10 +139,12 @@ export class YConnect {
   async publicKeys(): Promise<Dic> {
     return await axios
       .get(`${URL.BASE}/${URL.PUBLIC_KEYS}`)
-      .then(function (response) {
+      .then((response) => {
+        this.logger.debug("Public Keys - Response", response);
         return response.data;
       })
-      .catch(function (error) {
+      .catch((error) => {
+        this.logger.debug("Public Keys - Error Response", error);
         return error.response.data;
       });
   }

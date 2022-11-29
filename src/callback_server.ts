@@ -1,11 +1,14 @@
 import url from "url";
 import Express from "express";
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { Server } from "http";
+import { Logger } from "./logger";
 
 @injectable()
 export class CallbackServer {
   server: Server | undefined;
+
+  constructor(@inject("Logger") private logger: Logger) {}
 
   async create(
     frontendPath = "front",
@@ -34,6 +37,7 @@ export class CallbackServer {
           const callbackUrl = decodeURIComponent(
             url.parse(req.url, true).query.callback_url as string
           );
+          this.logger.debug("Callback URL", callbackUrl);
           resolve(callbackUrl);
         }
       );

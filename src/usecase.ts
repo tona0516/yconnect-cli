@@ -36,14 +36,10 @@ export class Usecase {
       codeChallenge: options.codeChallenge as string,
       codeChallengeMethod: options.codeChallengeMethod as string,
     };
-    this.logger.debug("Authorization Parameter", authzParam);
-
     const authzUrl = this.yconnect.generateAuthzURL(authzParam);
-    this.logger.debug("Authorization URL", authzUrl);
     open(authzUrl);
 
     const callbackUrl = await this.callbackServer.create();
-    this.logger.debug("Callback URL", callbackUrl);
     this.callbackServer.close();
 
     let authzResponse: Dic = {};
@@ -64,7 +60,6 @@ export class Usecase {
     let publicKeysResponse: Dic = {};
     if (options.verify) {
       publicKeysResponse = await this.yconnect.publicKeys();
-      this.logger.debug("`Public keys Response", publicKeysResponse);
     }
 
     if (options.verify) {

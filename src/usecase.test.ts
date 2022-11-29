@@ -21,7 +21,7 @@ let idtokenVerifier: IdTokenVerifier;
 
 beforeEach(() => {
   logger = new Logger();
-  callbackServer = new CallbackServer();
+  callbackServer = new CallbackServer(logger);
   yconnect = new YConnect(logger);
   userinfoApi = new UserinfoApi(logger);
   idtokenVerifier = new IdTokenVerifier(logger);

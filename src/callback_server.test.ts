@@ -1,11 +1,14 @@
+import "reflect-metadata";
 import axios from "axios";
+import { Logger } from "./logger";
 import "reflect-metadata";
 import { CallbackServer } from "./callback_server";
 
 let callbackServer: CallbackServer;
 
 beforeEach(() => {
-  callbackServer = new CallbackServer();
+  const logger = new Logger();
+  callbackServer = new CallbackServer(logger);
 });
 
 afterEach(() => {

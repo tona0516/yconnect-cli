@@ -92,18 +92,28 @@ export class IdTokenVerifier {
     }
 
     if (accessToken) {
-      if (this.verifyATHash(payload, accessToken)) {
+      const [isValid, expected] = this.verifyHash(accessToken, payload.at_hash);
+      if (isValid) {
         result.valid_at_hash = true;
       } else {
         result.valid_at_hash = false;
+        this.logger.debug(`${LogTitle} - invalid at_hash`, {
+          expected: expected,
+          actual: payload.at_hash,
+        });
       }
     }
 
     if (code) {
-      if (this.verifyCHash(payload, code)) {
+      const [isValid, expected] = this.verifyHash(code, payload.c_hash);
+      if (isValid) {
         result.valid_c_hash = true;
       } else {
         result.valid_c_hash = false;
+        this.logger.debug(`${LogTitle} - invalid c_hash`, {
+          expected: expected,
+          actual: payload.at_hash,
+        });
       }
     }
 
@@ -153,43 +163,10 @@ export class IdTokenVerifier {
     }
   }
 
-  private verifyATHash(payload: Payload, accessToken: string): boolean {
-    try {
-      const expectedHash = this.createHash(accessToken);
-      if (payload.at_hash === expectedHash) {
-        return true;
-      } else {
-        this.logger.debug(`${LogTitle} - invalid at_hash`, {
-          expected: expectedHash,
-          actual: payload.at_hash,
-        });
-        return false;
-      }
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private verifyCHash(payload: Payload, code: string): boolean {
-    try {
-      const expectedHash = this.createHash(code);
-      if (payload.c_hash === expectedHash) {
-        return true;
-      } else {
-        this.logger.debug(`${LogTitle} - invalid c_hash`, {
-          expected: expectedHash,
-          actual: payload.c_hash,
-        });
-        return false;
-      }
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private createHash(value: string): string {
+  private verifyHash(value: string, hashInPayload?: string): [boolean, string] {
     const hash = createHash("sha256").update(value).digest();
     const halfOfHash = Uint8Array.from(hash).slice(0, hash.length / 2);
-    return base64url.encode(Buffer.from(halfOfHash));
+    const expectedHash = base64url.encode(Buffer.from(halfOfHash));
+    return [hashInPayload === expectedHash, expectedHash];
   }
 }
