@@ -33,10 +33,12 @@ let UserinfoApi = class UserinfoApi {
         searchParams.append("access_token", accessToken);
         return await axios_1.default
             .get(`${URL.BASE}/${URL.ATTRIBUTE}?access_token=${accessToken}`)
-            .then(function (response) {
+            .then((response) => {
+            this.logger.debug("UserInfoAPI - Response", response);
             return response.data;
         })
-            .catch(function (error) {
+            .catch((error) => {
+            this.logger.debug("UserInfoAPI - Error Response", error);
             return error.response.data;
         });
     }

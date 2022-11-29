@@ -3,12 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+require("reflect-metadata");
 const axios_1 = __importDefault(require("axios"));
+const logger_1 = require("./logger");
 require("reflect-metadata");
 const callback_server_1 = require("./callback_server");
 let callbackServer;
 beforeEach(() => {
-    callbackServer = new callback_server_1.CallbackServer();
+    const logger = new logger_1.Logger();
+    callbackServer = new callback_server_1.CallbackServer(logger);
 });
 afterEach(() => {
     callbackServer.close();
