@@ -11,6 +11,7 @@ jest.mock("./logger");
 jest.mock("./userinfoapi");
 jest.mock("./yconnect");
 jest.mock("./callback_server");
+jest.mock("./idtoken_verifier");
 jest.mock("open");
 let logger;
 let callbackServer;
@@ -20,7 +21,7 @@ let usecase;
 let idtokenVerifier;
 beforeEach(() => {
     logger = new logger_1.Logger();
-    callbackServer = new callback_server_1.CallbackServer();
+    callbackServer = new callback_server_1.CallbackServer(logger);
     yconnect = new yconnect_1.YConnect(logger);
     userinfoApi = new userinfoapi_1.UserinfoApi(logger);
     idtokenVerifier = new idtoken_verifier_1.IdTokenVerifier(logger);
@@ -81,7 +82,7 @@ test("authorize() hybrid code flow", async () => {
     expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
     expect(logger.info).toHaveBeenNthCalledWith(2, "Token Response", expect.anything());
 });
-test("authorize() error", async () => {
+test("authorize() authz error", async () => {
     jest
         .spyOn(callbackServer, "create")
         .mockImplementation(() => Promise.resolve("http://localhost:3000/front?error=any_error&error_description=any_error_description&error_code=123"));
@@ -94,6 +95,28 @@ test("authorize() error", async () => {
     };
     await usecase.authorize(options);
     expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+});
+test("authorize() token error", async () => {
+    jest
+        .spyOn(callbackServer, "create")
+        .mockImplementation(() => Promise.resolve("http://localhost:3000/front?code=123"));
+    jest.spyOn(yconnect, "issueToken").mockImplementation(() => {
+        return Promise.resolve({
+            error: "any_error",
+            error_description: "any_description",
+            error_code: 0,
+        });
+    });
+    const options = {
+        responseType: ["code"],
+        clientId: "any_client_id",
+        redirectUri: "any_redirect_uri",
+        scope: ["openid"],
+        debug: false,
+    };
+    await usecase.authorize(options);
+    expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+    expect(logger.info).toHaveBeenNthCalledWith(2, "Token Response", expect.anything());
 });
 test("authorize() no code", async () => {
     jest
@@ -108,6 +131,31 @@ test("authorize() no code", async () => {
     };
     await usecase.authorize(options);
     expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+});
+test("authorize() verify", async () => {
+    jest
+        .spyOn(callbackServer, "create")
+        .mockImplementation(() => Promise.resolve("http://localhost:3000/front#code=123&access_token=456&id_token=789"));
+    jest.spyOn(idtokenVerifier, "verify").mockImplementation(() => {
+        return [true, {}];
+    });
+    jest.spyOn(yconnect, "issueToken").mockImplementation(() => {
+        return Promise.resolve({});
+    });
+    const options = {
+        responseType: ["code", "token", "id_token"],
+        clientId: "any_client_id",
+        redirectUri: "any_redirect_uri",
+        scope: ["openid"],
+        nonce: "any_nonce",
+        debug: false,
+        verify: true,
+    };
+    await usecase.authorize(options);
+    expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+    expect(logger.info).toHaveBeenNthCalledWith(2, "ID Token Verification", expect.anything());
+    expect(logger.info).toHaveBeenNthCalledWith(3, "Token Response", expect.anything());
+    expect(logger.info).toHaveBeenNthCalledWith(4, "ID Token Verification", expect.anything());
 });
 test("refresh()", async () => {
     jest.spyOn(yconnect, "refreshToken").mockImplementation(() => {

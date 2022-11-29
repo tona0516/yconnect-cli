@@ -55,12 +55,9 @@ let Usecase = class Usecase {
             codeChallenge: options.codeChallenge,
             codeChallengeMethod: options.codeChallengeMethod,
         };
-        this.logger.debug("Authorization Parameter", authzParam);
         const authzUrl = this.yconnect.generateAuthzURL(authzParam);
-        this.logger.debug("Authorization URL", authzUrl);
         (0, open_1.default)(authzUrl);
         const callbackUrl = await this.callbackServer.create();
-        this.logger.debug("Callback URL", callbackUrl);
         this.callbackServer.close();
         let authzResponse = {};
         if (callbackUrl.includes("#")) {
@@ -76,12 +73,11 @@ let Usecase = class Usecase {
         let publicKeysResponse = {};
         if (options.verify) {
             publicKeysResponse = await this.yconnect.publicKeys();
-            this.logger.debug("`Public keys Response", publicKeysResponse);
         }
         if (options.verify) {
             if (authzResponse.id_token) {
                 const [isValid, result] = this.idTokenVerifier.verify(authzResponse.id_token, options.clientId, options.nonce, publicKeysResponse, authzResponse.access_token, authzResponse.code);
-                this.logger.info("ID Token verification", result);
+                this.logger.info("ID Token Verification", result);
                 if (!isValid) {
                     this.logger.info("ID Token verification", "ID Token is invalid.");
                     return;
@@ -107,9 +103,9 @@ let Usecase = class Usecase {
         }
         if (options.verify) {
             const [isValid, result] = this.idTokenVerifier.verify(tokenResponse.id_token, options.clientId, options.nonce, publicKeysResponse, tokenResponse.access_token, undefined);
-            this.logger.info("ID Token verification", result);
+            this.logger.info("ID Token Verification", result);
             if (!isValid) {
-                this.logger.info("ID Token verification", "ID Token is invalid.");
+                this.logger.info("ID Token Verification", "ID Token is invalid.");
                 return;
             }
         }

@@ -65,10 +65,12 @@ let YConnect = class YConnect {
         if (param.codeChallengeMethod) {
             query["code_challenge_method"] = param.codeChallengeMethod;
         }
-        return (0, build_url_ts_1.buildUrl)(URL.BASE, {
+        const authzUrl = (0, build_url_ts_1.buildUrl)(URL.BASE, {
             path: URL.AUTHORIZATION,
             queryParams: query,
         });
+        this.logger.debug("Authorization URL", authzUrl);
+        return authzUrl;
     }
     async issueToken(param) {
         const searchParams = new URLSearchParams();
@@ -84,10 +86,12 @@ let YConnect = class YConnect {
         }
         return await axios_1.default
             .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
-            .then(function (response) {
+            .then((response) => {
+            this.logger.debug("Token - Response", response);
             return response.data;
         })
-            .catch(function (error) {
+            .catch((error) => {
+            this.logger.debug("Token - Error Response", error);
             return error.response.data;
         });
     }
@@ -101,20 +105,24 @@ let YConnect = class YConnect {
         }
         return await axios_1.default
             .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
-            .then(function (response) {
+            .then((response) => {
+            this.logger.debug("Token - Response", response);
             return response.data;
         })
-            .catch(function (error) {
+            .catch((error) => {
+            this.logger.debug("Token - Error Response", error);
             return error.response.data;
         });
     }
     async publicKeys() {
         return await axios_1.default
             .get(`${URL.BASE}/${URL.PUBLIC_KEYS}`)
-            .then(function (response) {
+            .then((response) => {
+            this.logger.debug("Public Keys - Response", response);
             return response.data;
         })
-            .catch(function (error) {
+            .catch((error) => {
+            this.logger.debug("Public Keys - Error Response", error);
             return error.response.data;
         });
     }

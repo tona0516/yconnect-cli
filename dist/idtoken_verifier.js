@@ -75,19 +75,29 @@ let IdTokenVerifier = class IdTokenVerifier {
             }
         }
         if (accessToken) {
-            if (this.verifyATHash(payload, accessToken)) {
+            const [isValid, expected] = this.verifyHash(accessToken, payload.at_hash);
+            if (isValid) {
                 result.valid_at_hash = true;
             }
             else {
                 result.valid_at_hash = false;
+                this.logger.debug(`${LogTitle} - invalid at_hash`, {
+                    expected: expected,
+                    actual: payload.at_hash,
+                });
             }
         }
         if (code) {
-            if (this.verifyCHash(payload, code)) {
+            const [isValid, expected] = this.verifyHash(code, payload.c_hash);
+            if (isValid) {
                 result.valid_c_hash = true;
             }
             else {
                 result.valid_c_hash = false;
+                this.logger.debug(`${LogTitle} - invalid c_hash`, {
+                    expected: expected,
+                    actual: payload.at_hash,
+                });
             }
         }
         const currentTimeStamp = Date.now() / 1000;
@@ -130,46 +140,11 @@ let IdTokenVerifier = class IdTokenVerifier {
             return undefined;
         }
     }
-    verifyATHash(payload, accessToken) {
-        try {
-            const expectedHash = this.createHash(accessToken);
-            if (payload.at_hash === expectedHash) {
-                return true;
-            }
-            else {
-                this.logger.debug(`${LogTitle} - invalid at_hash`, {
-                    expected: expectedHash,
-                    actual: payload.at_hash,
-                });
-                return false;
-            }
-        }
-        catch (error) {
-            return false;
-        }
-    }
-    verifyCHash(payload, code) {
-        try {
-            const expectedHash = this.createHash(code);
-            if (payload.c_hash === expectedHash) {
-                return true;
-            }
-            else {
-                this.logger.debug(`${LogTitle} - invalid c_hash`, {
-                    expected: expectedHash,
-                    actual: payload.c_hash,
-                });
-                return false;
-            }
-        }
-        catch (error) {
-            return false;
-        }
-    }
-    createHash(value) {
+    verifyHash(value, hashInPayload) {
         const hash = (0, crypto_1.createHash)("sha256").update(value).digest();
-        const halfOfHash = hash.slice(0, hash.length / 2);
-        return base64url_1.default.encode(halfOfHash);
+        const halfOfHash = Uint8Array.from(hash).slice(0, hash.length / 2);
+        const expectedHash = base64url_1.default.encode(Buffer.from(halfOfHash));
+        return [hashInPayload === expectedHash, expectedHash];
     }
 };
 IdTokenVerifier = __decorate([
