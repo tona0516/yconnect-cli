@@ -9,7 +9,7 @@ https://developer.yahoo.co.jp/yconnect/v2/
 ## Getting start
 ```
 $ npm i -g @tona0516/yconnect-cli
-$ yconnect-cli
+$ yconnect-cli help
 ```
 ## Preparation
 1. Create Client ID (ref. https://e.developer.yahoo.co.jp/register).
@@ -17,15 +17,16 @@ $ yconnect-cli
 
 ## Examples
 ### Client-side Client ID
-- Get tokens
-  - simple
-    - `$ yconnect-cli auth -c <Client ID>`
-  - with options
-    - `$ yconnect-cli auth -c <Client ID> --scope openid profile address`
-- Get userinfo by access token
-  - `$ yconnect-cli userinfo <Access Token>`
-- Refresh access token
-  - `$ yconnect-cli refresh -c <Client ID> -r <Refresh Token>`
+#### Get tokens
+- simple (getting tokens with Authorization Code Flow)
+  - `$ yconnect-cli auth -c <Client ID>`
+- with options (getting profile data and require user consent)
+  - `$ yconnect-cli auth -c <Client ID> --scope openid profile --prompt consent`
+
+#### Get userinfo
+`$ yconnect-cli userinfo -a <Access Token>`
+#### Refresh access token
+`$ yconnect-cli refresh -c <Client ID> -r <Refresh Token>`
 
 ### Server-side Client ID
 Add `--client-secret <Client Secret>` in the case of `auth` and `refresh` subcommand.
