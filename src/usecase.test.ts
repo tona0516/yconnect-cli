@@ -155,6 +155,37 @@ test("authorize() authz error", async () => {
   );
 });
 
+test("authorize() state is invalid", async () => {
+  jest
+    .spyOn(callbackServer, "create")
+    .mockImplementation(() =>
+      Promise.resolve(
+        "http://localhost:3000/front?code=123&state=invalid_state"
+      )
+    );
+
+  const options = {
+    responseType: ["code"],
+    clientId: "any_client_id",
+    redirectUri: "any_redirect_uri",
+    scope: ["openid"],
+    state: "any_state",
+    debug: false,
+  };
+  await usecase.authorize(options);
+
+  expect(logger.info).toHaveBeenNthCalledWith(
+    1,
+    "Authorization Response",
+    expect.anything()
+  );
+  expect(logger.info).toHaveBeenNthCalledWith(
+    2,
+    "Authorization Response Validation",
+    expect.anything()
+  );
+});
+
 test("authorize() token error", async () => {
   jest
     .spyOn(callbackServer, "create")

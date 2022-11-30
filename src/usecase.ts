@@ -77,7 +77,7 @@ export class Usecase {
         this.logger.info("ID Token Verification", result);
 
         if (!isValid) {
-          this.logger.info("ID Token verification", "ID Token is invalid.");
+          this.logger.info("ID Token Verification", "ID Token is invalid.");
           return;
         }
       }
@@ -87,6 +87,19 @@ export class Usecase {
       // - implicit flow
       // - bail=1 and no consent
       // - respond error
+      return;
+    }
+
+    if (
+      options.state &&
+      authzResponse.state &&
+      options.state !== authzResponse.state
+    ) {
+      this.logger.info("Authorization Response Validation", {
+        message: "state is invalid",
+        expected: options.state,
+        actual: authzResponse.state,
+      });
       return;
     }
 
