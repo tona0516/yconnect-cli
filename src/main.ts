@@ -23,11 +23,6 @@ function main() {
         "code",
       ])
     )
-    .addOption(
-      new Option("--redirect-uri <string>", "redirect_uri").default(
-        "http://localhost:3000/front"
-      )
-    )
     .addOption(new Option("--scope <string...>", "scope").default(["openid"]))
     .option("--bail", "bail")
     .option("--state <string>", "state")

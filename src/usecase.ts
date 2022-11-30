@@ -22,10 +22,11 @@ export class Usecase {
     if (options.debug) this.logger.enableDebug();
     this.logger.debug("Input parameters", options);
 
+    const redirectUri = "http://localhost:3000/front";
     const authzParam: AuthorizationParam = {
       responseType: options.responseType as string[],
       clientId: options.clientId as string,
-      redirectUri: options.redirectUri as string,
+      redirectUri: redirectUri,
       scope: options.scope as string[],
       bail: options.bail as boolean,
       state: options.state as string,
@@ -91,7 +92,7 @@ export class Usecase {
 
     const tokenResponse = await this.yconnect.issueToken({
       clientId: options.clientId as string,
-      redirectUri: options.redirectUri as string,
+      redirectUri: redirectUri,
       code: authzResponse.code,
       clientSecret: options.clientSecret as string,
       codeVerifier: options.codeVerifier as string,
