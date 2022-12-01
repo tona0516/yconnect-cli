@@ -40,11 +40,12 @@ let Usecase = class Usecase {
     async authorize(options) {
         if (options.debug)
             this.logger.enableDebug();
-        this.logger.debug("Input parameters", options);
+        this.logger.debug("Input Parameters", options);
+        const redirectUri = "http://localhost:3000/front";
         const authzParam = {
             responseType: options.responseType,
             clientId: options.clientId,
-            redirectUri: options.redirectUri,
+            redirectUri: redirectUri,
             scope: options.scope,
             bail: options.bail,
             state: options.state,
@@ -76,10 +77,9 @@ let Usecase = class Usecase {
         }
         if (options.verify) {
             if (authzResponse.id_token) {
-                const [isValid, result] = this.idTokenVerifier.verify(authzResponse.id_token, options.clientId, options.nonce, publicKeysResponse, authzResponse.access_token, authzResponse.code);
+                const [isValid, result] = this.idTokenVerifier.verify(authzResponse.id_token, options.clientId, publicKeysResponse, options.nonce, authzResponse.access_token, authzResponse.code);
                 this.logger.info("ID Token Verification", result);
                 if (!isValid) {
-                    this.logger.info("ID Token verification", "ID Token is invalid.");
                     return;
                 }
             }
@@ -90,9 +90,19 @@ let Usecase = class Usecase {
             // - respond error
             return;
         }
+        if (options.state &&
+            authzResponse.state &&
+            options.state !== authzResponse.state) {
+            this.logger.info("Authorization Response Validation", {
+                message: "state is invalid",
+                expected: options.state,
+                actual: authzResponse.state,
+            });
+            return;
+        }
         const tokenResponse = await this.yconnect.issueToken({
             clientId: options.clientId,
-            redirectUri: options.redirectUri,
+            redirectUri: redirectUri,
             code: authzResponse.code,
             clientSecret: options.clientSecret,
             codeVerifier: options.codeVerifier,
@@ -102,10 +112,9 @@ let Usecase = class Usecase {
             return;
         }
         if (options.verify) {
-            const [isValid, result] = this.idTokenVerifier.verify(tokenResponse.id_token, options.clientId, options.nonce, publicKeysResponse, tokenResponse.access_token, undefined);
+            const [isValid, result] = this.idTokenVerifier.verify(tokenResponse.id_token, options.clientId, publicKeysResponse, options.nonce, tokenResponse.access_token, undefined);
             this.logger.info("ID Token Verification", result);
             if (!isValid) {
-                this.logger.info("ID Token Verification", "ID Token is invalid.");
                 return;
             }
         }
@@ -114,7 +123,7 @@ let Usecase = class Usecase {
     async refresh(options) {
         if (options.debug)
             this.logger.enableDebug();
-        this.logger.debug("Input parameters", options);
+        this.logger.debug("Input Parameters", options);
         const tokenResponse = await this.yconnect.refreshToken({
             clientId: options.clientId,
             refreshToken: options.refreshToken,
@@ -126,7 +135,7 @@ let Usecase = class Usecase {
     async fetchUserinfo(options) {
         if (options.debug)
             this.logger.enableDebug();
-        this.logger.debug("Input parameters", options);
+        this.logger.debug("Input Parameters", options);
         const userinfoResponse = await this.userinfoApi.get(options.accessToken);
         this.logger.info("Userinfo Response", userinfoResponse);
     }

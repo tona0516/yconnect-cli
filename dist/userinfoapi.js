@@ -34,11 +34,11 @@ let UserinfoApi = class UserinfoApi {
         return await axios_1.default
             .get(`${URL.BASE}/${URL.ATTRIBUTE}?access_token=${accessToken}`)
             .then((response) => {
-            this.logger.debug("UserInfoAPI - Response", response);
+            this.logger.debug("UserInfo Endpoint Response", response);
             return response.data;
         })
             .catch((error) => {
-            this.logger.debug("UserInfoAPI - Error Response", error);
+            this.logger.debug("UserInfo Endpoint Response", error);
             return error.response.data;
         });
     }

@@ -21,14 +21,16 @@ const tsyringe_1 = require("tsyringe");
 const base64url_1 = __importDefault(require("base64url"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = require("crypto");
+const clock_1 = require("./clock");
 const ISS = "https://auth.login.yahoo.co.jp/yconnect/v2";
-const LogTitle = "ID Token verification result";
 let IdTokenVerifier = class IdTokenVerifier {
     logger;
-    constructor(logger) {
+    clock;
+    constructor(logger, clock) {
         this.logger = logger;
+        this.clock = clock;
     }
-    verify(idToken, clientId, nonce, publicKeysResponse, accessToken, code) {
+    verify(idToken, clientId, publicKeysResponse, nonce, accessToken, code) {
         const result = {};
         const kid = this.extractKid(idToken);
         if (!kid) {
@@ -46,32 +48,35 @@ let IdTokenVerifier = class IdTokenVerifier {
             result.valid_iss = true;
         }
         else {
-            this.logger.debug(`${LogTitle} - invalid iss`, {
+            result.valid_iss = false;
+            result.iss_error_detail = {
+                message: "invalid iss",
                 expected: ISS,
                 actual: payload.iss,
-            });
-            result.valid_iss = false;
+            };
         }
         if (payload.aud.includes(clientId)) {
             result.valid_aud = true;
         }
         else {
-            this.logger.debug(`${LogTitle} - aud is not contained the Client ID`, {
-                target: clientId,
-                actual: payload.aud,
-            });
             result.valid_aud = false;
+            result.aud_error_detail = {
+                message: "aud is not contained the Client ID",
+                expected: clientId,
+                actual: payload.aud,
+            };
         }
         if (nonce) {
             if (payload.nonce === nonce) {
                 result.valid_nonce = true;
             }
             else {
-                this.logger.debug(`${LogTitle} - invalid nonce`, {
+                result.valid_nonce = false;
+                result.nonce_error_detail = {
+                    message: "invalid nonce",
                     expected: nonce,
                     actual: payload.nonce,
-                });
-                result.valid_nonce = false;
+                };
             }
         }
         if (accessToken) {
@@ -81,10 +86,11 @@ let IdTokenVerifier = class IdTokenVerifier {
             }
             else {
                 result.valid_at_hash = false;
-                this.logger.debug(`${LogTitle} - invalid at_hash`, {
+                result.at_hash_error_detail = {
+                    message: "invalid at_hash",
                     expected: expected,
                     actual: payload.at_hash,
-                });
+                };
             }
         }
         if (code) {
@@ -94,31 +100,31 @@ let IdTokenVerifier = class IdTokenVerifier {
             }
             else {
                 result.valid_c_hash = false;
-                this.logger.debug(`${LogTitle} - invalid c_hash`, {
+                result.c_hash_error_detail = {
+                    message: "invalid c_hash",
                     expected: expected,
                     actual: payload.at_hash,
-                });
+                };
             }
         }
-        const currentTimeStamp = Date.now() / 1000;
-        if (payload.exp > currentTimeStamp) {
+        const current = this.clock.currentUnixtime();
+        if (payload.exp > current) {
             result.not_expired = true;
         }
         else {
-            this.logger.debug(`${LogTitle} - expired`, {
-                current: currentTimeStamp,
-                exp: payload.exp,
-            });
             result.not_expired = false;
+            result.expire_error_detail = {
+                message: "expired",
+                current: current,
+                expiration: payload.exp,
+            };
         }
-        let isValid = true;
-        Object.values(result).forEach((value) => {
-            if (value === false) {
-                isValid = false;
-                return;
-            }
-        });
-        return [isValid, result];
+        if (Object.values(result).filter((value) => value === false).length === 0) {
+            return [true, result];
+        }
+        else {
+            return [false, result];
+        }
     }
     extractKid(idToken) {
         try {
@@ -150,7 +156,9 @@ let IdTokenVerifier = class IdTokenVerifier {
 IdTokenVerifier = __decorate([
     (0, tsyringe_1.injectable)(),
     __param(0, (0, tsyringe_1.inject)("Logger")),
-    __metadata("design:paramtypes", [logger_1.Logger])
+    __param(1, (0, tsyringe_1.inject)("Clock")),
+    __metadata("design:paramtypes", [logger_1.Logger,
+        clock_1.Clock])
 ], IdTokenVerifier);
 exports.IdTokenVerifier = IdTokenVerifier;
 //# sourceMappingURL=idtoken_verifier.js.map
