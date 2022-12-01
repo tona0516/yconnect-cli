@@ -5,6 +5,9 @@ import base64url from "base64url";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import { createHash } from "crypto";
+import { Clock } from "./clock";
+
+jest.mock("./clock");
 
 const sign = (payload: object, privateKey: string): string => {
   return jwt.sign(payload, privateKey, {
@@ -42,16 +45,19 @@ const normalResult = {
   not_expired: true,
 };
 
+let clock: Clock;
 let idtokenVerifier: IdTokenVerifier;
 let privateKey: string;
 let publicKeyResponse: { any_kid: string };
 
 beforeEach(() => {
   const logger = new Logger();
-  idtokenVerifier = new IdTokenVerifier(logger);
+  clock = new Clock();
+  idtokenVerifier = new IdTokenVerifier(logger, clock);
   privateKey = fs.readFileSync("testkey/private.key", "utf-8");
   const publicKey = fs.readFileSync("testkey/public.key", "utf-8");
   publicKeyResponse = { any_kid: publicKey };
+  jest.spyOn(clock, "currentUnixtime").mockImplementation(() => 1640962801);
 });
 
 afterEach(() => {
@@ -65,7 +71,6 @@ test("verify() minimum", () => {
     aud: ["any_client_id"],
     exp: 1893423600,
     iat: 1640962800,
-    nonce: "any_nonce",
   };
 
   const idtoken = sign(payload, privateKey);
@@ -73,7 +78,6 @@ test("verify() minimum", () => {
   const [isValid, result] = idtokenVerifier.verify(
     idtoken,
     "any_client_id",
-    "any_nonce",
     publicKeyResponse
   );
 
@@ -83,7 +87,6 @@ test("verify() minimum", () => {
     valid_signature: true,
     valid_iss: true,
     valid_aud: true,
-    valid_nonce: true,
     not_expired: true,
   });
 });
@@ -94,8 +97,8 @@ test("verify() full", () => {
   const [isValid, result] = idtokenVerifier.verify(
     idtoken,
     "any_client_id",
-    "any_nonce",
     publicKeyResponse,
+    "any_nonce",
     "any_access_token",
     "any_code"
   );
@@ -110,8 +113,8 @@ test("veriry() error not found kid", () => {
   const [isValid, result] = idtokenVerifier.verify(
     idtoken,
     "any_client_id",
-    "any_nonce",
     publicKeyResponse,
+    "any_nonce",
     "any_access_token",
     "any_code"
   );
@@ -132,8 +135,8 @@ test("veriry() error another private key", () => {
   const [isValid, result] = idtokenVerifier.verify(
     idtoken,
     "any_client_id",
-    "any_nonce",
     publicKeyResponse,
+    "any_nonce",
     "any_access_token",
     "any_code"
   );
@@ -146,12 +149,72 @@ test("veriry() error another private key", () => {
 });
 
 test.each([
-  [{ iss: "https://accounts.google.com" }, { valid_iss: false }],
-  [{ aud: "invalid_aud" }, { valid_aud: false }],
-  [{ nonce: "invalid_nonce" }, { valid_nonce: false }],
-  [{ at_hash: hash("invalid_access_token") }, { valid_at_hash: false }],
-  [{ c_hash: hash("invalid_code") }, { valid_c_hash: false }],
-  [{ exp: 1640962800 }, { not_expired: false }],
+  [
+    { iss: "https://accounts.google.com" },
+    {
+      valid_iss: false,
+      iss_error_detail: {
+        actual: "https://accounts.google.com",
+        expected: "https://auth.login.yahoo.co.jp/yconnect/v2",
+        message: "invalid iss",
+      },
+    },
+  ],
+  [
+    { aud: "invalid_aud" },
+    {
+      valid_aud: false,
+      aud_error_detail: {
+        actual: "invalid_aud",
+        expected: "any_client_id",
+        message: "aud is not contained the Client ID",
+      },
+    },
+  ],
+  [
+    { nonce: "invalid_nonce" },
+    {
+      valid_nonce: false,
+      nonce_error_detail: {
+        actual: "invalid_nonce",
+        expected: "any_nonce",
+        message: "invalid nonce",
+      },
+    },
+  ],
+  [
+    { at_hash: hash("invalid_access_token") },
+    {
+      valid_at_hash: false,
+      at_hash_error_detail: {
+        actual: "4Qhe0Tgef7dkZgjaOBn3NQ",
+        expected: "5YxVQn1cpQRqBxKe3_4Eyg",
+        message: "invalid at_hash",
+      },
+    },
+  ],
+  [
+    { c_hash: hash("invalid_code") },
+    {
+      valid_c_hash: false,
+      c_hash_error_detail: {
+        actual: "5YxVQn1cpQRqBxKe3_4Eyg",
+        expected: "Dy9PSuHTTTPBC5gwnhnnZg",
+        message: "invalid c_hash",
+      },
+    },
+  ],
+  [
+    { exp: 1640962800 },
+    {
+      not_expired: false,
+      expire_error_detail: {
+        current: 1640962801,
+        expiration: 1640962800,
+        message: "expired",
+      },
+    },
+  ],
 ])(
   "veriry() error invalid payload - %s",
   (overWritternPayload, overwrittenExpected) => {
@@ -162,13 +225,16 @@ test.each([
     const [isValid, result] = idtokenVerifier.verify(
       idtoken,
       "any_client_id",
-      "any_nonce",
       publicKeyResponse,
+      "any_nonce",
       "any_access_token",
       "any_code"
     );
 
     expect(isValid).toBe(false);
-    expect(result).toStrictEqual({ ...normalResult, ...overwrittenExpected });
+    expect(result).toStrictEqual({
+      ...normalResult,
+      ...overwrittenExpected,
+    });
   }
 );

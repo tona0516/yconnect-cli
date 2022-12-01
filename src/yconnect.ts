@@ -106,11 +106,11 @@ export class YConnect {
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
       .then((response) => {
-        this.logger.debug("Token - Response", response);
+        this.logger.debug("Token Endpoint Response", response.data);
         return response.data;
       })
       .catch((error) => {
-        this.logger.debug("Token - Error Response", error);
+        this.logger.debug("Token Endpoint Response", error.response.data);
         return error.response.data;
       });
   }
@@ -127,11 +127,11 @@ export class YConnect {
     return await axios
       .post(`${URL.BASE}/${URL.TOKEN}`, searchParams)
       .then((response) => {
-        this.logger.debug("Token - Response", response);
+        this.logger.debug("Token Endpoint Response", response.data);
         return response.data;
       })
       .catch((error) => {
-        this.logger.debug("Token - Error Response", error);
+        this.logger.debug("Token Endpoint Response", error.response.data);
         return error.response.data;
       });
   }
@@ -140,11 +140,11 @@ export class YConnect {
     return await axios
       .get(`${URL.BASE}/${URL.PUBLIC_KEYS}`)
       .then((response) => {
-        this.logger.debug("Public Keys - Response", response);
+        this.logger.debug("Public Keys Endpoint Response", response.data);
         return response.data;
       })
       .catch((error) => {
-        this.logger.debug("Public Keys - Error Response", error);
+        this.logger.debug("Public Keys Endpoint Response", error.response.data);
         return error.response.data;
       });
   }

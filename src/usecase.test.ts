@@ -5,11 +5,13 @@ import { CallbackServer } from "./callback_server";
 import { YConnect } from "./yconnect";
 import { Usecase } from "./usecase";
 import { IdTokenVerifier } from "./idtoken_verifier";
+import { Clock } from "./clock";
 
 jest.mock("./logger");
 jest.mock("./userinfoapi");
 jest.mock("./yconnect");
 jest.mock("./callback_server");
+jest.mock("./clock");
 jest.mock("./idtoken_verifier");
 jest.mock("open");
 
@@ -18,6 +20,7 @@ let callbackServer: CallbackServer;
 let yconnect: YConnect;
 let userinfoApi: UserinfoApi;
 let usecase: Usecase;
+let clock: Clock;
 let idtokenVerifier: IdTokenVerifier;
 
 beforeEach(() => {
@@ -25,7 +28,7 @@ beforeEach(() => {
   callbackServer = new CallbackServer(logger);
   yconnect = new YConnect(logger);
   userinfoApi = new UserinfoApi(logger);
-  idtokenVerifier = new IdTokenVerifier(logger);
+  idtokenVerifier = new IdTokenVerifier(logger, clock);
   usecase = new Usecase(
     logger,
     callbackServer,

@@ -8,6 +8,7 @@ import { Logger } from "./logger";
 import { Usecase } from "./usecase";
 import { UserinfoApi } from "./userinfoapi";
 import { YConnect } from "./yconnect";
+import { Clock } from "./clock";
 
 export class DependencyInjection {
   private static instance: DependencyInjection;
@@ -27,6 +28,7 @@ export class DependencyInjection {
 
   private init(): TsyringeDependencyContainer {
     container.registerSingleton("Logger", Logger);
+    container.registerSingleton("Clock", Clock);
     container.register("CallbackServer", { useClass: CallbackServer });
     container.register("UserinfoApi", { useClass: UserinfoApi });
     container.register("YConnect", { useClass: YConnect });

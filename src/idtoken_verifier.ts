@@ -4,19 +4,25 @@ import base64url from "base64url";
 import jwt from "jsonwebtoken";
 import { createHash } from "crypto";
 import { Dic } from "./util";
+import { Clock } from "./clock";
 
 const ISS = "https://auth.login.yahoo.co.jp/yconnect/v2";
-const LogTitle = "ID Token verification result";
 
 export interface IdTokenVerificationResult {
   extract_kid?: boolean;
   valid_signature?: boolean;
   valid_iss?: boolean;
+  iss_error_detail?: object;
   valid_aud?: boolean;
+  aud_error_detail?: object;
   valid_nonce?: boolean;
+  nonce_error_detail?: object;
   valid_at_hash?: boolean;
+  at_hash_error_detail?: object;
   valid_c_hash?: boolean;
+  c_hash_error_detail?: object;
   not_expired?: boolean;
+  expire_error_detail?: object;
 }
 
 interface Payload {
@@ -33,13 +39,16 @@ interface Payload {
 
 @injectable()
 export class IdTokenVerifier {
-  constructor(@inject("Logger") private logger: Logger) {}
+  constructor(
+    @inject("Logger") private logger: Logger,
+    @inject("Clock") private clock: Clock
+  ) {}
 
   verify(
     idToken: string,
     clientId: string,
-    nonce: string,
     publicKeysResponse: Dic,
+    nonce?: string,
     accessToken?: string,
     code?: string
   ): [boolean, IdTokenVerificationResult] {
@@ -62,32 +71,35 @@ export class IdTokenVerifier {
     if (payload.iss === ISS) {
       result.valid_iss = true;
     } else {
-      this.logger.debug(`${LogTitle} - invalid iss`, {
+      result.valid_iss = false;
+      result.iss_error_detail = {
+        message: "invalid iss",
         expected: ISS,
         actual: payload.iss,
-      });
-      result.valid_iss = false;
+      };
     }
 
     if (payload.aud.includes(clientId)) {
       result.valid_aud = true;
     } else {
-      this.logger.debug(`${LogTitle} - aud is not contained the Client ID`, {
-        target: clientId,
-        actual: payload.aud,
-      });
       result.valid_aud = false;
+      result.aud_error_detail = {
+        message: "aud is not contained the Client ID",
+        expected: clientId,
+        actual: payload.aud,
+      };
     }
 
     if (nonce) {
       if (payload.nonce === nonce) {
         result.valid_nonce = true;
       } else {
-        this.logger.debug(`${LogTitle} - invalid nonce`, {
+        result.valid_nonce = false;
+        result.nonce_error_detail = {
+          message: "invalid nonce",
           expected: nonce,
           actual: payload.nonce,
-        });
-        result.valid_nonce = false;
+        };
       }
     }
 
@@ -97,10 +109,11 @@ export class IdTokenVerifier {
         result.valid_at_hash = true;
       } else {
         result.valid_at_hash = false;
-        this.logger.debug(`${LogTitle} - invalid at_hash`, {
+        result.at_hash_error_detail = {
+          message: "invalid at_hash",
           expected: expected,
           actual: payload.at_hash,
-        });
+        };
       }
     }
 
@@ -110,33 +123,31 @@ export class IdTokenVerifier {
         result.valid_c_hash = true;
       } else {
         result.valid_c_hash = false;
-        this.logger.debug(`${LogTitle} - invalid c_hash`, {
+        result.c_hash_error_detail = {
+          message: "invalid c_hash",
           expected: expected,
           actual: payload.at_hash,
-        });
+        };
       }
     }
 
-    const currentTimeStamp = Date.now() / 1000;
-    if (payload.exp > currentTimeStamp) {
+    const current = this.clock.currentUnixtime();
+    if (payload.exp > current) {
       result.not_expired = true;
     } else {
-      this.logger.debug(`${LogTitle} - expired`, {
-        current: currentTimeStamp,
-        exp: payload.exp,
-      });
       result.not_expired = false;
+      result.expire_error_detail = {
+        message: "expired",
+        current: current,
+        expiration: payload.exp,
+      };
     }
 
-    let isValid = true;
-    Object.values(result).forEach((value) => {
-      if (value === false) {
-        isValid = false;
-        return;
-      }
-    });
-
-    return [isValid, result];
+    if (Object.values(result).filter((value) => value === false).length === 0) {
+      return [true, result];
+    } else {
+      return [false, result];
+    }
   }
 
   private extractKid(idToken: string): string | undefined {

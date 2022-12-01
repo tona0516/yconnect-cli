@@ -20,22 +20,22 @@ export class Usecase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async authorize(options: any) {
     if (options.debug) this.logger.enableDebug();
-    this.logger.debug("Input parameters", options);
+    this.logger.debug("Input Parameters", options);
 
     const redirectUri = "http://localhost:3000/front";
     const authzParam: AuthorizationParam = {
-      responseType: options.responseType as string[],
-      clientId: options.clientId as string,
+      responseType: options.responseType,
+      clientId: options.clientId,
       redirectUri: redirectUri,
-      scope: options.scope as string[],
-      bail: options.bail as boolean,
-      state: options.state as string,
-      nonce: options.nonce as string,
-      display: options.display as string,
-      prompt: options.prompt as string[],
-      maxAge: options.maxAge as number,
-      codeChallenge: options.codeChallenge as string,
-      codeChallengeMethod: options.codeChallengeMethod as string,
+      scope: options.scope,
+      bail: options.bail,
+      state: options.state,
+      nonce: options.nonce,
+      display: options.display,
+      prompt: options.prompt,
+      maxAge: options.maxAge,
+      codeChallenge: options.codeChallenge,
+      codeChallengeMethod: options.codeChallengeMethod,
     };
     const authzUrl = this.yconnect.generateAuthzURL(authzParam);
     open(authzUrl);
@@ -67,9 +67,9 @@ export class Usecase {
       if (authzResponse.id_token) {
         const [isValid, result] = this.idTokenVerifier.verify(
           authzResponse.id_token,
-          options.clientId as string,
-          options.nonce as string,
+          options.clientId,
           publicKeysResponse,
+          options.nonce,
           authzResponse.access_token,
           authzResponse.code
         );
@@ -77,7 +77,6 @@ export class Usecase {
         this.logger.info("ID Token Verification", result);
 
         if (!isValid) {
-          this.logger.info("ID Token Verification", "ID Token is invalid.");
           return;
         }
       }
@@ -104,11 +103,11 @@ export class Usecase {
     }
 
     const tokenResponse = await this.yconnect.issueToken({
-      clientId: options.clientId as string,
+      clientId: options.clientId,
       redirectUri: redirectUri,
       code: authzResponse.code,
-      clientSecret: options.clientSecret as string,
-      codeVerifier: options.codeVerifier as string,
+      clientSecret: options.clientSecret,
+      codeVerifier: options.codeVerifier,
     });
     this.logger.info("Token Response", tokenResponse);
 
@@ -119,9 +118,9 @@ export class Usecase {
     if (options.verify) {
       const [isValid, result] = this.idTokenVerifier.verify(
         tokenResponse.id_token,
-        options.clientId as string,
-        options.nonce as string,
+        options.clientId,
         publicKeysResponse,
+        options.nonce,
         tokenResponse.access_token,
         undefined
       );
@@ -129,7 +128,6 @@ export class Usecase {
       this.logger.info("ID Token Verification", result);
 
       if (!isValid) {
-        this.logger.info("ID Token Verification", "ID Token is invalid.");
         return;
       }
     }
@@ -138,7 +136,7 @@ export class Usecase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async refresh(options: any) {
     if (options.debug) this.logger.enableDebug();
-    this.logger.debug("Input parameters", options);
+    this.logger.debug("Input Parameters", options);
 
     const tokenResponse = await this.yconnect.refreshToken({
       clientId: options.clientId as string,
@@ -152,7 +150,7 @@ export class Usecase {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async fetchUserinfo(options: any) {
     if (options.debug) this.logger.enableDebug();
-    this.logger.debug("Input parameters", options);
+    this.logger.debug("Input Parameters", options);
 
     const userinfoResponse = await this.userinfoApi.get(
       options.accessToken as string
