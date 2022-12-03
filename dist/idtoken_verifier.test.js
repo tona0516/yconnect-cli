@@ -23,12 +23,15 @@ const hash = (value) => {
     const halfOfHash = hash.slice(0, hash.length / 2);
     return base64url_1.default.encode(halfOfHash);
 };
+const unixtime = (year, monthIndex, date, hours, minutes, seconds) => {
+    return (new Date(year, monthIndex, date, hours, minutes, seconds).getTime() / 1000);
+};
 const normalPayload = {
     iss: "https://auth.login.yahoo.co.jp/yconnect/v2",
     sub: "any_sub",
     aud: ["any_client_id"],
-    exp: 1893423600,
-    iat: 1640962800,
+    exp: unixtime(2030, 1, 1, 0, 0, 0),
+    iat: unixtime(2022, 1, 1, 0, 0, 0),
     nonce: "any_nonce",
     amr: ["pwd"],
     at_hash: hash("any_access_token"),
@@ -55,7 +58,9 @@ beforeEach(() => {
     privateKey = fs_1.default.readFileSync("testkey/private.key", "utf-8");
     const publicKey = fs_1.default.readFileSync("testkey/public.key", "utf-8");
     publicKeyResponse = { any_kid: publicKey };
-    jest.spyOn(clock, "currentUnixtime").mockImplementation(() => 1640962801);
+    jest
+        .spyOn(clock, "currentUnixtime")
+        .mockImplementation(() => unixtime(2022, 1, 1, 0, 0, 1));
 });
 afterEach(() => {
     jest.restoreAllMocks();
@@ -65,8 +70,8 @@ test("verify() minimum", () => {
         iss: "https://auth.login.yahoo.co.jp/yconnect/v2",
         sub: "any_sub",
         aud: ["any_client_id"],
-        exp: 1893423600,
-        iat: 1640962800,
+        exp: unixtime(2030, 1, 1, 0, 0, 0),
+        iat: unixtime(2022, 1, 1, 0, 0, 0),
     };
     const idtoken = sign(payload, privateKey);
     const [isValid, result] = idtokenVerifier.verify(idtoken, "any_client_id", publicKeyResponse);
@@ -89,7 +94,7 @@ test("veriry() error not found kid", () => {
     const idtoken = jsonwebtoken_1.default.sign(normalPayload, privateKey, { algorithm: "RS256" });
     const [isValid, result] = idtokenVerifier.verify(idtoken, "any_client_id", publicKeyResponse, "any_nonce", "any_access_token", "any_code");
     expect(isValid).toBe(false);
-    expect(result).toMatchObject({
+    expect(result).toStrictEqual({
         extract_kid: false,
     });
 });
@@ -100,7 +105,7 @@ test("veriry() error another private key", () => {
     const idtoken = sign(normalPayload, privateKey);
     const [isValid, result] = idtokenVerifier.verify(idtoken, "any_client_id", publicKeyResponse, "any_nonce", "any_access_token", "any_code");
     expect(isValid).toBe(false);
-    expect(result).toMatchObject({
+    expect(result).toStrictEqual({
         extract_kid: true,
         valid_signature: false,
     });
@@ -162,12 +167,12 @@ test.each([
         },
     ],
     [
-        { exp: 1640962800 },
+        { exp: unixtime(2022, 1, 1, 0, 0, 0) },
         {
             not_expired: false,
             expire_error_detail: {
-                current: 1640962801,
-                expiration: 1640962800,
+                current: unixtime(2022, 1, 1, 0, 0, 1),
+                expiration: unixtime(2022, 1, 1, 0, 0, 0),
                 message: "expired",
             },
         },
