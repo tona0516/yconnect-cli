@@ -22,12 +22,25 @@ const hash = (value: string): string => {
   return base64url.encode(halfOfHash);
 };
 
+const unixtime = (
+  year: number,
+  monthIndex: number,
+  date: number,
+  hours: number,
+  minutes: number,
+  seconds: number
+): number => {
+  return (
+    new Date(year, monthIndex, date, hours, minutes, seconds).getTime() / 1000
+  );
+};
+
 const normalPayload = {
   iss: "https://auth.login.yahoo.co.jp/yconnect/v2",
   sub: "any_sub",
   aud: ["any_client_id"],
-  exp: 1893423600,
-  iat: 1640962800,
+  exp: unixtime(2030, 1, 1, 0, 0, 0),
+  iat: unixtime(2022, 1, 1, 0, 0, 0),
   nonce: "any_nonce",
   amr: ["pwd"],
   at_hash: hash("any_access_token"),
@@ -57,7 +70,9 @@ beforeEach(() => {
   privateKey = fs.readFileSync("testkey/private.key", "utf-8");
   const publicKey = fs.readFileSync("testkey/public.key", "utf-8");
   publicKeyResponse = { any_kid: publicKey };
-  jest.spyOn(clock, "currentUnixtime").mockImplementation(() => 1640962801);
+  jest
+    .spyOn(clock, "currentUnixtime")
+    .mockImplementation(() => unixtime(2022, 1, 1, 0, 0, 1));
 });
 
 afterEach(() => {
@@ -69,8 +84,8 @@ test("verify() minimum", () => {
     iss: "https://auth.login.yahoo.co.jp/yconnect/v2",
     sub: "any_sub",
     aud: ["any_client_id"],
-    exp: 1893423600,
-    iat: 1640962800,
+    exp: unixtime(2030, 1, 1, 0, 0, 0),
+    iat: unixtime(2022, 1, 1, 0, 0, 0),
   };
 
   const idtoken = sign(payload, privateKey);
@@ -120,7 +135,7 @@ test("veriry() error not found kid", () => {
   );
 
   expect(isValid).toBe(false);
-  expect(result).toMatchObject({
+  expect(result).toStrictEqual({
     extract_kid: false,
   });
 });
@@ -142,7 +157,7 @@ test("veriry() error another private key", () => {
   );
 
   expect(isValid).toBe(false);
-  expect(result).toMatchObject({
+  expect(result).toStrictEqual({
     extract_kid: true,
     valid_signature: false,
   });
@@ -205,12 +220,12 @@ test.each([
     },
   ],
   [
-    { exp: 1640962800 },
+    { exp: unixtime(2022, 1, 1, 0, 0, 0) },
     {
       not_expired: false,
       expire_error_detail: {
-        current: 1640962801,
-        expiration: 1640962800,
+        current: unixtime(2022, 1, 1, 0, 0, 1),
+        expiration: unixtime(2022, 1, 1, 0, 0, 0),
         message: "expired",
       },
     },
