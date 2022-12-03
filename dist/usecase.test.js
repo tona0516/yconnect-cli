@@ -11,6 +11,7 @@ jest.mock("./logger");
 jest.mock("./userinfoapi");
 jest.mock("./yconnect");
 jest.mock("./callback_server");
+jest.mock("./clock");
 jest.mock("./idtoken_verifier");
 jest.mock("open");
 let logger;
@@ -18,13 +19,14 @@ let callbackServer;
 let yconnect;
 let userinfoApi;
 let usecase;
+let clock;
 let idtokenVerifier;
 beforeEach(() => {
     logger = new logger_1.Logger();
     callbackServer = new callback_server_1.CallbackServer(logger);
     yconnect = new yconnect_1.YConnect(logger);
     userinfoApi = new userinfoapi_1.UserinfoApi(logger);
-    idtokenVerifier = new idtoken_verifier_1.IdTokenVerifier(logger);
+    idtokenVerifier = new idtoken_verifier_1.IdTokenVerifier(logger, clock);
     usecase = new usecase_1.Usecase(logger, callbackServer, yconnect, userinfoApi, idtokenVerifier);
     jest.spyOn(logger, "info").mockImplementation();
 });
@@ -95,6 +97,22 @@ test("authorize() authz error", async () => {
     };
     await usecase.authorize(options);
     expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+});
+test("authorize() state is invalid", async () => {
+    jest
+        .spyOn(callbackServer, "create")
+        .mockImplementation(() => Promise.resolve("http://localhost:3000/front?code=123&state=invalid_state"));
+    const options = {
+        responseType: ["code"],
+        clientId: "any_client_id",
+        redirectUri: "any_redirect_uri",
+        scope: ["openid"],
+        state: "any_state",
+        debug: false,
+    };
+    await usecase.authorize(options);
+    expect(logger.info).toHaveBeenNthCalledWith(1, "Authorization Response", expect.anything());
+    expect(logger.info).toHaveBeenNthCalledWith(2, "Authorization Response Validation", expect.anything());
 });
 test("authorize() token error", async () => {
     jest

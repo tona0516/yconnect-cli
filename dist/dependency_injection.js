@@ -8,6 +8,7 @@ const logger_1 = require("./logger");
 const usecase_1 = require("./usecase");
 const userinfoapi_1 = require("./userinfoapi");
 const yconnect_1 = require("./yconnect");
+const clock_1 = require("./clock");
 class DependencyInjection {
     static instance;
     container;
@@ -22,6 +23,7 @@ class DependencyInjection {
     }
     init() {
         tsyringe_1.container.registerSingleton("Logger", logger_1.Logger);
+        tsyringe_1.container.registerSingleton("Clock", clock_1.Clock);
         tsyringe_1.container.register("CallbackServer", { useClass: callback_server_1.CallbackServer });
         tsyringe_1.container.register("UserinfoApi", { useClass: userinfoapi_1.UserinfoApi });
         tsyringe_1.container.register("YConnect", { useClass: yconnect_1.YConnect });

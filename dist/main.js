@@ -19,7 +19,6 @@ function main() {
         .addOption(new commander_1.Option("--response-type <string...>", "response_type").default([
         "code",
     ]))
-        .addOption(new commander_1.Option("--redirect-uri <string>", "redirect_uri").default("http://localhost:3000/front"))
         .addOption(new commander_1.Option("--scope <string...>", "scope").default(["openid"]))
         .option("--bail", "bail")
         .option("--state <string>", "state")
